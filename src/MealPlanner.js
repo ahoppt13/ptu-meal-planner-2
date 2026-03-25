@@ -341,7 +341,31 @@ export default function MealPlanner() {
   const tdee = calcTDEE(bmr, form.activity);
   const target = goalCalories(tdee, form.goal);
   const proteinTarget = calcProteinTarget(Number(form.weight), form.unit, form.goal);
+const saveLead = async () => {
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, goal: form.healthGoal })
+      });
+    } catch(e) {}
+  };
+```
 
+4. Now search for `onClick={() => setStep(1)}`
+5. Change it to: `onClick={() => { saveLead(); setStep(1); }}`
+6. **Save the file**
+
+---
+
+## Part D — Push the update
+
+Go back to Terminal (make sure you're in the `ptu-meal-planner-2` folder) and run:
+```
+git add .
+git commit -m "Add email capture"
+git push
   const doGenerate = () => {
     setGenerating(true);
     setTimeout(() => {
