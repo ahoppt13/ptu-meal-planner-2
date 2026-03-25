@@ -353,7 +353,7 @@ const saveLead = async () => {
   };
 ```
 
-4. Now search for `onClick={() => setStep(1)}`
+4. Now search for `onClick={() => { saveLead(); setStep(1); }}`
 5. Change it to: `onClick={() => { saveLead(); setStep(1); }}`
 6. **Save the file**
 
@@ -511,7 +511,7 @@ git push
                 ))}
               </div>
             </div>
-            <button style={{ ...S.primary, opacity: canNext() ? 1 : 0.4 }} disabled={!canNext()} onClick={() => setStep(1)}>
+            <button style={{ ...S.primary, opacity: canNext() ? 1 : 0.4 }} disabled={!canNext()} onClick={() => { saveLead(); setStep(1); }}>
               Get Started →
             </button>
           </div>)}
@@ -593,7 +593,7 @@ git push
               </button>
             ))}
             <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-              <button style={S.secondary} onClick={() => setStep(1)}>← Back</button>
+              <button style={S.secondary} onClick={() => { saveLead(); setStep(1); }}>← Back</button>
               <button style={S.primary} onClick={() => setStep(3)}>Continue →</button>
             </div>
           </div>)}
