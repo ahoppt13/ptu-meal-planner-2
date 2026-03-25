@@ -341,17 +341,17 @@ export default function MealPlanner() {
   const tdee = calcTDEE(bmr, form.activity);
   const target = goalCalories(tdee, form.goal);
   const proteinTarget = calcProteinTarget(Number(form.weight), form.unit, form.goal);
-const saveLead = async () => {
+  const saveLead = () => {
     try {
-      await fetch("https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec", {
+      const url = "https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec";
+      fetch(url, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify({ name: form.name, email: form.email, goal: form.healthGoal })
       });
     } catch(e) {}
   };
-```
 
 6. **Save the file**
 
