@@ -343,27 +343,23 @@ export default function MealPlanner() {
   const proteinTarget = calcProteinTarget(Number(form.weight), form.unit, form.goal);
   const saveLead = () => {
     try {
-      const url = "https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec";
-      fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ name: form.name, email: form.email, goal: form.healthGoal })
-      });
+      const f = document.createElement("form");
+      f.method = "POST";
+      f.action = "https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec";
+      f.target = "_blank_hidden";
+      const addField = (n, v) => { const i = document.createElement("input"); i.type = "hidden"; i.name = n; i.value = v; f.appendChild(i); };
+      addField("name", form.name);
+      addField("email", form.email);
+      addField("goal", form.healthGoal);
+      const iframe = document.createElement("iframe");
+      iframe.name = "_blank_hidden";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+      document.body.appendChild(f);
+      f.submit();
+      setTimeout(() => { f.remove(); iframe.remove(); }, 3000);
     } catch(e) {}
   };
-
-6. **Save the file**
-
----
-
-## Part D — Push the update
-
-Go back to Terminal (make sure you're in the `ptu-meal-planner-2` folder) and run:
-```
-git add .
-git commit -m "Add email capture"
-git push
   const doGenerate = () => {
     setGenerating(true);
     setTimeout(() => {
