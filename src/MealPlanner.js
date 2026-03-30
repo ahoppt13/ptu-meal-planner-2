@@ -562,8 +562,8 @@ export default function MealPlanner() {
           {/* ── STEP 2: GOAL & CALORIES ── */}
           {step === 2 && (<div>
             <div style={S.greenBanner}>
-              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1, color: C.greyMid, fontWeight: 600 }}>Your Maintenance (TDEE)</div>
-              <div style={{ fontSize: 38, fontWeight: 800, color: C.black }}>{tdee} <span style={{ fontSize: 15, fontWeight: 400 }}>kcal</span></div>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1, color: C.greyMid, fontWeight: 600 }}>{form.goal === "fat_loss" ? "Your Fat Loss Calories" : form.goal === "muscle_gain" ? "Your Muscle Gain Calories" : "Your Maintenance Calories"}</div>
+              <div style={{ fontSize: 42, fontWeight: 800, color: C.green, transition: "all 0.3s" }}>{target} <span style={{ fontSize: 15, fontWeight: 400, color: C.dark }}>kcal/day</span></div>
               <div style={{ fontSize: 12, color: C.greyMid, marginTop: 4 }}>Protein target: <strong style={{ color: C.black }}>{proteinTarget}g/day</strong> ({form.goal === "fat_loss" ? "2.0" : "1.8"}g/kg)</div>
             </div>
             <div style={S.section}>Choose Your Calorie Goal</div>
