@@ -314,7 +314,7 @@ const StepIndicator = ({ current, total }) => (
 export default function MealPlanner() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    name: "", email: "", healthGoal: "",
+    name: "", email: "", emailConfirm: "", healthGoal: "",
     age: "", gender: "male", weight: "", height: "", unit: "metric",
     activity: "moderate", goal: "fat_loss", diet: "no-restrictions",
     mealsPerDay: 3, people: 1, allergens: [], conditions: [],
@@ -359,6 +359,53 @@ export default function MealPlanner() {
       f.submit();
       setTimeout(() => { f.remove(); iframe.remove(); }, 3000);
     } catch(e) {}
+  };
+
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+
+  const sendMealPlanEmail = () => {
+    if (!plan || emailSending) return;
+    setEmailSending(true);
+    try {
+      let mealHtml = "";
+      plan.forEach(day => {
+        mealHtml += "<h2>Day " + day.day + " (" + day.totalCal + " kcal | " + day.totalProtein + "g protein)</h2>";
+        Object.entries(day.meals).forEach(([type, meal]) => {
+          if (!meal) return;
+          mealHtml += "<div style=\"margin:8px 0;padding:12px;background:#f8f8f8;border-radius:8px;border-left:4px solid #8BC43F;\">";
+          mealHtml += "<strong>" + type.charAt(0).toUpperCase() + type.slice(1) + ":</strong> " + meal.name + "<br/>";
+          mealHtml += "<span style=\"font-size:12px;color:#666;\">" + meal.cal + " kcal | P:" + meal.protein + "g | C:" + meal.carbs + "g | F:" + meal.fat + "g</span><br/>";
+          mealHtml += "<span style=\"font-size:13px;\">" + meal.recipe + "</span><br/>";
+          mealHtml += "<span style=\"font-size:12px;color:#555;\">Ingredients: " + meal.ingredients.map(i => i.qty + " " + i.item).join(", ") + "</span>";
+          mealHtml += "</div>";
+        });
+      });
+      let shopHtml = "<h2>Shopping List</h2><table style=\"width:100%;border-collapse:collapse;\">";
+      shopHtml += "<tr><th style=\"text-align:left;padding:6px;background:#353535;color:#fff;\">Item</th><th style=\"text-align:left;padding:6px;background:#353535;color:#fff;\">Qty</th></tr>";
+      shoppingList.forEach(s => { shopHtml += "<tr><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.item + "</td><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.qty + " x" + s.multiply + "</td></tr>"; });
+      shopHtml += "</table>";
+      const f = document.createElement("form");
+      f.method = "POST";
+      f.action = "https://script.google.com/macros/s/AKfycbxBa7zE3rzAbE3Gezt8-OIoifI1JTTZJqJ9fl-wxP9ELZPwMMFXUj71kL2uSdsFyTZ5/exec";
+      f.target = "_blank_hidden2";
+      const addField = (n, v) => { const i = document.createElement("input"); i.type = "hidden"; i.name = n; i.value = v; f.appendChild(i); };
+      addField("action", "sendEmail");
+      addField("email", form.email);
+      addField("name", form.name);
+      addField("calories", String(target));
+      addField("protein", String(proteinTarget));
+      addField("goal", form.healthGoal);
+      addField("mealHtml", mealHtml);
+      addField("shopHtml", shopHtml);
+      const iframe = document.createElement("iframe");
+      iframe.name = "_blank_hidden2";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+      document.body.appendChild(f);
+      f.submit();
+      setTimeout(() => { f.remove(); iframe.remove(); setEmailSent(true); setEmailSending(false); }, 3000);
+    } catch(e) { setEmailSending(false); }
   };
   const doGenerate = () => {
     setGenerating(true);
@@ -459,7 +506,7 @@ export default function MealPlanner() {
   };
 
   const canNext = () => {
-    if (step === 0) return form.name && form.email && form.healthGoal;
+    if (step === 0) return form.name && form.email && form.emailConfirm && form.email === form.emailConfirm && form.healthGoal;
     if (step === 1) return form.age && form.weight && form.height;
     return true;
   };
@@ -489,6 +536,12 @@ export default function MealPlanner() {
             <div style={{ marginBottom: 16 }}>
               <label style={S.label}>Email Address</label>
               <input style={S.input} type="email" placeholder="you@email.com" value={form.email} onChange={e => update("email", e.target.value)} />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={S.label}>Confirm Email</label>
+              <input style={S.input} type="email" placeholder="Confirm your email" value={form.emailConfirm} onChange={e => update("emailConfirm", e.target.value)} />
+              {form.email && form.emailConfirm && form.email !== form.emailConfirm && <div style={{ color: "#e53935", fontSize: 12, marginTop: 4 }}>Emails do not match</div>}
+              {form.email && form.emailConfirm && form.email === form.emailConfirm && <div style={{ color: "#8BC43F", fontSize: 12, marginTop: 4 }}>✓ Emails match</div>}
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={S.label}>What's Your Primary Goal?</label>
@@ -790,6 +843,7 @@ export default function MealPlanner() {
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
               <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
+              <button style={{ ...S.primary, background: emailSent ? "#4CAF50" : emailSending ? "#999" : "#353535" }} onClick={sendMealPlanEmail} disabled={emailSending || emailSent}>{emailSent ? "✓ Sent!" : emailSending ? "Sending..." : "📧 Email My Plan"}</button>
             </div>
           </div>)}
         </div>
