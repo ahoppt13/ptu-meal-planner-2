@@ -527,13 +527,22 @@ export default function MealPlanner() {
                 <label style={S.label}>Age</label>
                 <input style={S.input} type="number" placeholder="25" value={form.age} onChange={e => update("age", e.target.value)} />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={S.label}>Gender</label>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button style={S.btn(form.gender==="male")} onClick={() => update("gender","male")}>Male</button>
-                  <button style={S.btn(form.gender==="female")} onClick={() => update("gender","female")}>Female</button>
-                </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={S.label}>Activity Level</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {[["sedentary","Sedentary","Desk job, no exercise"],["light","Lightly Active","On your feet at work or light exercise 1-2x/week"],["moderate","Moderately Active","Exercise 3-5x/week or active job"],["active","Very Active","Hard exercise 6-7x/week or physical job + training"],["very_active","Extra Active","Intense training daily or physical job + heavy training"]].map(([v,l,d]) => (
+                  <button key={v} onClick={() => update("activity",v)} style={{
+                    display: "flex", flexDirection: "column", width: "100%", padding: "10px 14px", borderRadius: 8, textAlign: "left",
+                    border: form.activity===v ? "2px solid "+C.green : "1.5px solid "+C.greyBorder,
+                    background: form.activity===v ? C.green : C.white, color: form.activity===v ? C.white : C.dark,
+                    cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", boxSizing: "border-box"
+                  }}>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{l}</div>
+                    <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>{d}</div>
+                  </button>
+                ))}
               </div>
+            </div>
             </div>
             <div style={S.row}>
               <div style={{ flex: 1 }}>
