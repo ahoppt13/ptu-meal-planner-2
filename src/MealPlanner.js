@@ -521,12 +521,28 @@ export default function MealPlanner() {
                   <button style={S.btn(form.unit==="imperial")} onClick={() => update("unit","imperial")}>Imperial</button>
                 </div>
               </div>
+              <div style={{ flex: 1 }}>
+                <label style={S.label}>Gender</label>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button style={S.btn(form.gender==="male")} onClick={() => update("gender","male")}>Male</button>
+                  <button style={S.btn(form.gender==="female")} onClick={() => update("gender","female")}>Female</button>
+                </div>
+              </div>
             </div>
             <div style={S.row}>
               <div style={{ flex: 1 }}>
                 <label style={S.label}>Age</label>
                 <input style={S.input} type="number" placeholder="25" value={form.age} onChange={e => update("age", e.target.value)} />
               </div>
+              <div style={{ flex: 1 }}>
+                <label style={S.label}>Weight ({form.unit==="metric" ? "kg" : "lbs"})</label>
+                <input style={S.input} type="number" placeholder={form.unit==="metric"?"75":"165"} value={form.weight} onChange={e => update("weight", e.target.value)} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={S.label}>Height ({form.unit==="metric" ? "cm" : "in"})</label>
+                <input style={S.input} type="number" placeholder={form.unit==="metric"?"175":"69"} value={form.height} onChange={e => update("height", e.target.value)} />
+              </div>
+            </div>
             <div style={{ marginBottom: 16 }}>
               <label style={S.label}>Activity Level</label>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -540,25 +556,6 @@ export default function MealPlanner() {
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{l}</div>
                     <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>{d}</div>
                   </button>
-                ))}
-              </div>
-            </div>
-            </div>
-            <div style={S.row}>
-              <div style={{ flex: 1 }}>
-                <label style={S.label}>Weight ({form.unit==="metric" ? "kg" : "lbs"})</label>
-                <input style={S.input} type="number" placeholder={form.unit==="metric"?"75":"165"} value={form.weight} onChange={e => update("weight", e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={S.label}>Height ({form.unit==="metric" ? "cm" : "in"})</label>
-                <input style={S.input} type="number" placeholder={form.unit==="metric"?"175":"69"} value={form.height} onChange={e => update("height", e.target.value)} />
-              </div>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={S.label}>Activity Level</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {[["sedentary","Sedentary"],["light","Light"],["moderate","Moderate"],["active","Active"],["very_active","Very Active"]].map(([v,l]) => (
-                  <button key={v} style={{ ...S.btn(form.activity===v), flex: "none", padding: "10px 14px" }} onClick={() => update("activity",v)}>{l}</button>
                 ))}
               </div>
             </div>
