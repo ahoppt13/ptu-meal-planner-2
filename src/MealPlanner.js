@@ -843,7 +843,6 @@ export default function MealPlanner() {
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
               <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
-              <button style={{ ...S.primary, background: emailSent ? "#4CAF50" : emailSending ? "#999" : "#353535" }} onClick={sendMealPlanEmail} disabled={emailSending || emailSent}>{emailSent ? "✓ Sent!" : emailSending ? "Sending..." : "📧 Email My Plan"}</button>
             </div>
           </div>)}
         </div>
