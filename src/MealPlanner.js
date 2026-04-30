@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { supabase } from "./supabase";
 
 /*
   ╔══════════════════════════════════════════════════════════════════╗
@@ -330,10 +331,10 @@ const StepIndicator = ({ current, total }) => (
 );
 
 // ─── MAIN APP ────────────────────────────────────────────────────
-export default function MealPlanner() {
+export default function MealPlanner({ user }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    name: "", email: "", emailConfirm: "", healthGoal: "",
+    name: user?.user_metadata?.name || "", email: user?.email || "", emailConfirm: user?.email || "", healthGoal: "",
     age: "", gender: "male", weight: "", height: "", unit: "metric",
     activity: "moderate", goal: "fat_loss", diet: "no-restrictions",
     mealsPerDay: 3, people: 1, allergens: [], conditions: [],
@@ -534,7 +535,7 @@ export default function MealPlanner() {
     <div style={S.page}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: 16 }}>
-        <div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><button onClick={() => supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>Log out</button></div>
         <div style={S.subtitle}>Personalised Meal Planner</div>
 
         {step < 6 && <StepIndicator current={step} total={6} />}
