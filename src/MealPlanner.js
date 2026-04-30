@@ -885,6 +885,11 @@ export default function MealPlanner() {
               </div>
             ))}
 
+            <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 20 }}>
+              <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
+              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions)); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
+              <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
+            </div>
             {/* SHOPPING LIST */}
             <div style={{ ...S.section, marginTop: 24, display: "flex", alignItems: "center", gap: 8 }}>
               🛒 Shopping List
@@ -899,11 +904,6 @@ export default function MealPlanner() {
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-              <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
-              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions)); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
-              <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
-            </div>
           </div>)}
         </div>
 
