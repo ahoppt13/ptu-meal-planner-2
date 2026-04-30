@@ -332,7 +332,7 @@ const StepIndicator = ({ current, total }) => (
 
 // ─── MAIN APP ────────────────────────────────────────────────────
 export default function MealPlanner({ user, guest, onExitGuest }) {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(user ? 1 : 0);
   const [form, setForm] = useState({
     name: user?.user_metadata?.name || "", email: user?.email || "", emailConfirm: user?.email || "", healthGoal: "",
     age: "", gender: "male", weight: "", height: "", unit: "metric",
@@ -690,7 +690,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button style={S.secondary} onClick={() => setStep(0)}>← Back</button>
+              {!user && <button style={S.secondary} onClick={() => setStep(0)}>← Back</button>}
               <button style={{ ...S.primary, opacity: canNext() ? 1 : 0.4 }} disabled={!canNext()} onClick={() => setStep(2)}>Continue →</button>
             </div>
           </div>)}
@@ -937,7 +937,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
             ))}
 
             <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 20 }}>
-              <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
+              <button style={S.secondary} onClick={() => { setPlan(null); setStep(user ? 1 : 0); setShowRecipe(null); }}>Start Over</button>
               <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions)); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
             </div>
