@@ -214,7 +214,7 @@ function scaleMeal(meal, multiplier) {
 }
 
 // ─── MEAL PLAN GENERATOR ─────────────────────────────────────────
-function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens, conditions) {
+function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens, conditions, hiddenNames = []) {
   const needsLowSodium = conditions.includes("high_bp");
   const needsLowGI = conditions.includes("type2_diabetes");
   const needsLowSatFat = conditions.includes("high_chol");
@@ -228,7 +228,7 @@ function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens
       if (needsLowSodium && !m.health.includes("low_sodium")) healthOk = false;
       if (needsLowGI && !m.health.includes("low_gi")) healthOk = false;
       if (needsLowSatFat && !m.health.includes("low_sat_fat")) healthOk = false;
-      return dietMatch && allergenFree && healthOk;
+      const notHidden = !hiddenNames.includes(m.name); return dietMatch && allergenFree && healthOk && notHidden;
     }).sort((a, b) => {
       if (needsHighFibre) {
         const aF = a.health.includes("high_fibre") ? 1 : 0;
@@ -395,6 +395,28 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
 
   const isSaved = (mealName) => savedMeals.some(m => m.meal_name === mealName);
 
+  const [hiddenMeals, setHiddenMeals] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("hidden_meals").select("*").eq("user_id", user.id);
+      if (data) setHiddenMeals(data);
+    })();
+  }, [user]);
+
+  const hideMeal = async (meal) => {
+    if (!user) return;
+    const { data } = await supabase.from("hidden_meals").insert({ user_id: user.id, meal_name: meal.name }).select().single();
+    if (data) setHiddenMeals(h => [...h, data]);
+  };
+
+  const unhideMeal = async (id) => {
+    if (!user) return;
+    await supabase.from("hidden_meals").delete().eq("id", id);
+    setHiddenMeals(h => h.filter(m => m.id !== id));
+  };
+
   // Save preferences to Supabase
   const savePreferences = async () => {
     if (!user) return;
@@ -506,7 +528,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   const doGenerate = () => { savePreferences();
     setGenerating(true);
     setTimeout(() => {
-      setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions));
+      setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions, hiddenMeals.map(h => h.meal_name)));
       setGenerating(false);
       setStep(6);
     }, 800);
@@ -636,6 +658,17 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 </div>
               );
             })}
+            {hiddenMeals.length > 0 && (
+              <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid " + C.greyBorder }}>
+                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: C.greyMid }}>🚫 Hidden Meals ({hiddenMeals.length})</div>
+                {hiddenMeals.map(h => (
+                  <div key={h.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: C.grey, borderRadius: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, color: C.dark }}>{h.meal_name}</span>
+                    <button onClick={() => unhideMeal(h.id)} style={{ background: "transparent", border: "1px solid " + C.greyBorder, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", color: C.greyMid }}>Unhide</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -957,7 +990,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                           <div style={{ fontSize: 10, textTransform: "uppercase", color: C.greyMid, letterSpacing: 1, fontWeight: 600 }}>{type}</div>
                           <div style={{ fontWeight: 700, fontSize: 14, marginTop: 2 }}>{meal.name}</div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{user && <span onClick={(e) => { e.stopPropagation(); toggleSaveMeal(meal); }} style={{ fontSize: 22, cursor: "pointer" }}>{isSaved(meal.name) ? "❤️" : "🤍"}</span>}<div style={{ textAlign: "right" }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div><div style={{ fontSize: 10, color: C.greyMid }}>kcal</div></div></div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{user && <><span onClick={(e) => { e.stopPropagation(); toggleSaveMeal(meal); }} style={{ fontSize: 20, cursor: "pointer" }}>{isSaved(meal.name) ? "❤️" : "🤍"}</span><span onClick={(e) => { e.stopPropagation(); if(window.confirm("Hide "" + meal.name + "" from future plans?")) hideMeal(meal); }} style={{ fontSize: 18, cursor: "pointer", opacity: 0.5 }} title="Don't show me again">👎</span></>}<div style={{ textAlign: "right" }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div><div style={{ fontSize: 10, color: C.greyMid }}>kcal</div></div></div>
                       </div>
                       <div style={{ fontSize: 11, color: C.greyMid, marginTop: 3 }}>
                         P: {meal.protein}g &nbsp; C: {meal.carbs}g &nbsp; F: {meal.fat}g
@@ -990,7 +1023,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
 
             <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 20 }}>
               <button style={S.secondary} onClick={() => { setPlan(null); setStep(user ? 1 : 0); setShowRecipe(null); }}>Start Over</button>
-              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions)); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
+              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions, hiddenMeals.map(h => h.meal_name))); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
             </div>
             {/* SHOPPING LIST */}
