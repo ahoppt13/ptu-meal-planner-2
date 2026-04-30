@@ -346,6 +346,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   // Load preferences from Supabase on mount (only for logged-in users)
   useEffect(() => {
     if (!user) return;
+    setStep(s => s === 0 ? 1 : s);
     (async () => {
       const { data } = await supabase.from("preferences").select("*").eq("user_id", user.id).single();
       if (data) {
