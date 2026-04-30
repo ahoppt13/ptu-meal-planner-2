@@ -5,6 +5,7 @@ import { supabase } from './supabase';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [guest, setGuest] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,6 +16,7 @@ function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
+      if (session?.user) setGuest(false);
     });
 
     return () => subscription.unsubscribe();
@@ -28,11 +30,11 @@ function App() {
     );
   }
 
-  if (!user) {
-    return <Auth onAuth={setUser} />;
+  if (!user && !guest) {
+    return <Auth onAuth={setUser} onGuest={() => setGuest(true)} />;
   }
 
-  return <MealPlanner user={user} />;
+  return <MealPlanner user={user} guest={guest} onExitGuest={() => setGuest(false)} />;
 }
 
 export default App;
