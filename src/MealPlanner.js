@@ -342,6 +342,8 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   const [plan, setPlan] = useState(null);
   const [showRecipe, setShowRecipe] = useState(null);
   const [generating, setGenerating] = useState(false);
+  const [savedMeals, setSavedMeals] = useState([]);
+  const [viewSaved, setViewSaved] = useState(false);
 
   // Load preferences from Supabase on mount (only for logged-in users)
   useEffect(() => {
@@ -369,6 +371,29 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       }
     })();
   }, [user]);
+
+  // Load saved meals
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("saved_meals").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      if (data) setSavedMeals(data);
+    })();
+  }, [user]);
+
+  const toggleSaveMeal = async (meal) => {
+    if (!user) return;
+    const existing = savedMeals.find(m => m.meal_name === meal.name);
+    if (existing) {
+      await supabase.from("saved_meals").delete().eq("id", existing.id);
+      setSavedMeals(s => s.filter(m => m.id !== existing.id));
+    } else {
+      const { data } = await supabase.from("saved_meals").insert({ user_id: user.id, meal_name: meal.name, meal_data: meal }).select().single();
+      if (data) setSavedMeals(s => [data, ...s]);
+    }
+  };
+
+  const isSaved = (mealName) => savedMeals.some(m => m.meal_name === mealName);
 
   // Save preferences to Supabase
   const savePreferences = async () => {
@@ -585,8 +610,37 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   return (
     <div style={S.page}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+      {viewSaved && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 20, overflowY: "auto" }} onClick={() => setViewSaved(false)}>
+          <div style={{ background: C.white, borderRadius: 16, padding: 24, maxWidth: 560, width: "100%", maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>❤️ My Saved Meals</div>
+              <button onClick={() => setViewSaved(false)} style={{ background: "transparent", border: "none", fontSize: 24, cursor: "pointer" }}>×</button>
+            </div>
+            {savedMeals.length === 0 && (
+              <div style={{ textAlign: "center", color: C.greyMid, padding: 40, fontSize: 13 }}>No saved meals yet. Tap the 🤍 on any meal to save it.</div>
+            )}
+            {savedMeals.map(s => {
+              const m = s.meal_data;
+              return (
+                <div key={s.id} style={{ background: C.grey, borderRadius: 10, padding: 14, marginBottom: 8, borderLeft: "4px solid " + C.green }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{m.name}</div>
+                      <div style={{ fontSize: 11, color: C.greyMid, marginBottom: 6 }}>{m.cal} kcal • P: {m.protein}g • C: {m.carbs}g • F: {m.fat}g</div>
+                      <div style={{ fontSize: 12, color: C.dark, lineHeight: 1.5 }}>{m.recipe}</div>
+                      <div style={{ fontSize: 11, color: C.greyMid, marginTop: 6 }}><strong>Ingredients:</strong> {m.ingredients?.map(i => i.qty + " " + i.item).join(", ")}</div>
+                    </div>
+                    <button onClick={() => toggleSaveMeal(m)} style={{ background: "transparent", border: "none", fontSize: 22, cursor: "pointer" }} title="Remove from saved">❤️</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><div style={{ display: "flex", gap: 8 }}>{user && <button onClick={() => setViewSaved(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>❤️ Saved ({savedMeals.length})</button>}<button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div></div>
         <div style={S.subtitle}>Personalised Meal Planner</div>
 
         {step < 6 && <StepIndicator current={step} total={6} />}
@@ -903,10 +957,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                           <div style={{ fontSize: 10, textTransform: "uppercase", color: C.greyMid, letterSpacing: 1, fontWeight: 600 }}>{type}</div>
                           <div style={{ fontWeight: 700, fontSize: 14, marginTop: 2 }}>{meal.name}</div>
                         </div>
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div>
-                          <div style={{ fontSize: 10, color: C.greyMid }}>kcal</div>
-                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{user && <span onClick={(e) => { e.stopPropagation(); toggleSaveMeal(meal); }} style={{ fontSize: 22, cursor: "pointer" }}>{isSaved(meal.name) ? "❤️" : "🤍"}</span>}<div style={{ textAlign: "right" }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div><div style={{ fontSize: 10, color: C.greyMid }}>kcal</div></div></div>
                       </div>
                       <div style={{ fontSize: 11, color: C.greyMid, marginTop: 3 }}>
                         P: {meal.protein}g &nbsp; C: {meal.carbs}g &nbsp; F: {meal.fat}g
