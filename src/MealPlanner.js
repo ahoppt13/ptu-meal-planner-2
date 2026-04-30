@@ -344,6 +344,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   const [generating, setGenerating] = useState(false);
   const [savedMeals, setSavedMeals] = useState([]);
   const [viewSaved, setViewSaved] = useState(false);
+  const [viewHidden, setViewHidden] = useState(false);
 
   // Load preferences from Supabase on mount (only for logged-in users)
   useEffect(() => {
@@ -658,22 +659,30 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 </div>
               );
             })}
-            {hiddenMeals.length > 0 && (
-              <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid " + C.greyBorder }}>
-                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: C.greyMid }}>🚫 Hidden Meals ({hiddenMeals.length})</div>
-                {hiddenMeals.map(h => (
-                  <div key={h.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: C.grey, borderRadius: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: C.dark }}>{h.meal_name}</span>
-                    <button onClick={() => unhideMeal(h.id)} style={{ background: "transparent", border: "1px solid " + C.greyBorder, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", color: C.greyMid }}>Unhide</button>
-                  </div>
-                ))}
-              </div>
+          </div>
+        </div>
+      )}
+      {viewHidden && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 20, overflowY: "auto" }} onClick={() => setViewHidden(false)}>
+          <div style={{ background: C.white, borderRadius: 16, padding: 24, maxWidth: 560, width: "100%", maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>🚫 Hidden Meals</div>
+              <button onClick={() => setViewHidden(false)} style={{ background: "transparent", border: "none", fontSize: 24, cursor: "pointer" }}>×</button>
+            </div>
+            {hiddenMeals.length === 0 && (
+              <div style={{ textAlign: "center", color: C.greyMid, padding: 40, fontSize: 13 }}>No hidden meals. Tap the 👎 on any meal to hide it from future plans.</div>
             )}
+            {hiddenMeals.map(h => (
+              <div key={h.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: C.grey, borderRadius: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: C.dark }}>{h.meal_name}</span>
+                <button onClick={() => unhideMeal(h.id)} style={{ background: C.green, color: C.white, border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>Unhide</button>
+              </div>
+            ))}
           </div>
         </div>
       )}
       <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><div style={{ display: "flex", gap: 8 }}>{user && <button onClick={() => setViewSaved(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>❤️ Saved ({savedMeals.length})</button>}<button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><div style={{ display: "flex", gap: 8 }}>{user && <><button onClick={() => setViewSaved(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>❤️ ({savedMeals.length})</button><button onClick={() => setViewHidden(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>🚫 ({hiddenMeals.length})</button></>}<button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div></div>
         <div style={S.subtitle}>Personalised Meal Planner</div>
 
         {step < 6 && <StepIndicator current={step} total={6} />}
