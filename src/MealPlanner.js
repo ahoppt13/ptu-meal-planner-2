@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
 
 /*
@@ -343,6 +343,56 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   const [showRecipe, setShowRecipe] = useState(null);
   const [generating, setGenerating] = useState(false);
 
+  // Load preferences from Supabase on mount (only for logged-in users)
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("preferences").select("*").eq("user_id", user.id).single();
+      if (data) {
+        setForm(f => ({
+          ...f,
+          age: data.age || "",
+          gender: data.gender || "male",
+          weight: data.weight || "",
+          height: data.height || "",
+          unit: data.unit || "metric",
+          activity: data.activity || "moderate",
+          goal: data.goal || "fat_loss",
+          healthGoal: data.health_goal || "",
+          diet: data.diet || "no-restrictions",
+          mealsPerDay: data.meals_per_day || 3,
+          people: data.people || 1,
+          allergens: data.allergens || [],
+          conditions: data.conditions || [],
+        }));
+      }
+    })();
+  }, [user]);
+
+  // Save preferences to Supabase
+  const savePreferences = async () => {
+    if (!user) return;
+    try {
+      await supabase.from("preferences").upsert({
+        user_id: user.id,
+        age: Number(form.age) || null,
+        gender: form.gender,
+        weight: Number(form.weight) || null,
+        height: Number(form.height) || null,
+        unit: form.unit,
+        activity: form.activity,
+        goal: form.goal,
+        health_goal: form.healthGoal,
+        diet: form.diet,
+        meals_per_day: form.mealsPerDay,
+        people: form.people,
+        allergens: form.allergens,
+        conditions: form.conditions,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) { console.error("Save preferences error:", e); }
+  };
+
   const ALLERGENS = ["dairy","eggs","nuts","gluten","fish","shellfish","soy","sesame"];
   const CONDITIONS = [
     { id: "high_bp", label: "High Blood Pressure" },
@@ -427,7 +477,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       setTimeout(() => { f.remove(); iframe.remove(); setEmailSent(true); setEmailSending(false); }, 3000);
     } catch(e) { setEmailSending(false); }
   };
-  const doGenerate = () => {
+  const doGenerate = () => { savePreferences();
     setGenerating(true);
     setTimeout(() => {
       setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions));
