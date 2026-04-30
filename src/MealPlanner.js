@@ -781,6 +781,46 @@ export default function MealPlanner() {
               <div style={{ fontSize: 12, color: C.greyMid }}>{target} kcal/day • {proteinTarget}g protein • {form.people} {form.people===1?"person":"people"}</div>
             </div>
 
+            <div style={{ background: C.grey, borderRadius: 12, padding: 16, marginBottom: 16, textAlign: "center" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: C.greyMid, marginBottom: 12 }}>Daily Macro Breakdown</div>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24 }}>
+                <svg width="120" height="120" viewBox="0 0 42 42">
+                  {(() => {
+                    const totalCal = (proteinTarget * 4) + (Math.round((target - (proteinTarget * 4)) * 0.55 / 4) * 4) + (Math.round((target - (proteinTarget * 4)) * 0.45 / 9) * 9);
+                    const pCal = proteinTarget * 4;
+                    const cCal = Math.round((target - pCal) * 0.55);
+                    const fCal = target - pCal - cCal;
+                    const pPct = Math.round(pCal / target * 100);
+                    const cPct = Math.round(cCal / target * 100);
+                    const fPct = 100 - pPct - cPct;
+                    const r = 15.9155;
+                    const circ = 100;
+                    let offset = 25;
+                    const slices = [{pct: pPct, color: "#8BC43F"}, {pct: cPct, color: "#353535"}, {pct: fPct, color: "#f59e0b"}];
+                    return slices.map((s, i) => {
+                      const dash = `${s.pct} ${circ - s.pct}`;
+                      const el = <circle key={i} cx="21" cy="21" r={r} fill="none" stroke={s.color} strokeWidth="6" strokeDasharray={dash} strokeDashoffset={-offset + 100} />;
+                      offset += s.pct;
+                      return el;
+                    });
+                  })()}
+                  <text x="21" y="19" textAnchor="middle" fontSize="5" fontWeight="700" fill="#353535">{target}</text>
+                  <text x="21" y="24" textAnchor="middle" fontSize="3" fill="#888">kcal</text>
+                </svg>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[["Protein", proteinTarget * 4, proteinTarget + "g", "#8BC43F"], ["Carbs", Math.round((target - proteinTarget * 4) * 0.55), Math.round((target - proteinTarget * 4) * 0.55 / 4) + "g", "#353535"], ["Fats", Math.round((target - proteinTarget * 4) * 0.45), Math.round((target - proteinTarget * 4) * 0.45 / 9) + "g", "#f59e0b"]].map(([label, cal, grams, color]) => (
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 12, height: 12, borderRadius: 3, background: color, flexShrink: 0 }}></div>
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700 }}>{label} <span style={{ color: C.greyMid, fontWeight: 400 }}>{grams}</span></div>
+                        <div style={{ fontSize: 10, color: C.greyMid }}>{Math.round(cal / target * 100)}% of calories</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {plan[0].healthNotes.length > 0 && (
               <div style={{ background: C.greenLight, borderRadius: 10, padding: 14, fontSize: 12, lineHeight: 1.6, marginBottom: 16, color: C.dark }}>
                 <strong style={{ color: C.black }}>Evidence-Based Health Notes:</strong>
@@ -861,6 +901,7 @@ export default function MealPlanner() {
 
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
               <button style={S.secondary} onClick={() => { setPlan(null); setStep(0); setShowRecipe(null); }}>Start Over</button>
+              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions)); setGenerating(false); }, 400); }}>🔄 Regenerate</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
             </div>
           </div>)}
