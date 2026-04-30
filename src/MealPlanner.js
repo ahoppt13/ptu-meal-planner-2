@@ -269,7 +269,7 @@ function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens
 
       // Find the meal whose BASE calories are closest (least extreme scaling)
       candidates.sort((a, b) => Math.abs(a.cal - slotCalTarget) - Math.abs(b.cal - slotCalTarget));
-      const chosen = candidates[0];
+      const topN = candidates.slice(0, Math.min(3, candidates.length)); const chosen = topN[Math.floor(Math.random() * topN.length)];
       usedMeals[slotKey].push(chosen.name);
 
       // Calculate the portion multiplier to hit the slot calorie target
