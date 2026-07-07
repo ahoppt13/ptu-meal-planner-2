@@ -4,7 +4,8 @@ import { supabase } from './supabase';
 const C = { green: '#8BC43F', greenLight: '#e8f5d3', black: '#000000', dark: '#353535', greyBorder: '#dedede', greyMid: '#888', grey: '#f5f5f5', white: '#ffffff' };
 
 export default function Auth({ onAuth, onGuest }) {
-  const [mode, setMode] = useState('signup');
+  const [mode, setMode] = useState('signup'); // 'signup' | 'login' | 'forgot'
+  const [resetSent, setResetSent] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +17,16 @@ export default function Auth({ onAuth, onGuest }) {
     setError('');
     setLoading(true);
     try {
+      if (mode === 'forgot') {
+        if (!email) { setError('Please enter your email address'); setLoading(false); return; }
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        setLoading(false);
+        return;
+      }
       if (mode === 'signup') {
         if (!name) { setError('Please enter your name'); setLoading(false); return; }
         const { data, error } = await supabase.auth.signUp({
@@ -55,7 +66,7 @@ export default function Auth({ onAuth, onGuest }) {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div>
-        <div style={S.subtitle}>{mode === 'signup' ? 'Create your account' : 'Welcome back'}</div>
+        <div style={S.subtitle}>{mode === 'signup' ? 'Create your account' : mode === 'forgot' ? 'Reset your password' : 'Welcome back'}</div>
 
         {error && <div style={S.error}>{error}</div>}
 
@@ -65,22 +76,37 @@ export default function Auth({ onAuth, onGuest }) {
 
         <div style={S.divider}><div style={S.line}></div>OR<div style={S.line}></div></div>
 
-        <form onSubmit={handleEmail}>
-          {mode === 'signup' && (
-            <input style={S.input} type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
-          )}
-          <input style={S.input} type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input style={S.input} type="password" placeholder="Password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-          <button style={{ ...S.primary, opacity: loading ? 0.6 : 1 }} type="submit" disabled={loading}>
-            {loading ? 'Loading...' : mode === 'signup' ? 'Create Account' : 'Log In'}
-          </button>
-        </form>
+        {mode === 'forgot' && resetSent ? (
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <div style={{ fontSize: 30 }}>📧</div>
+            <div style={{ fontWeight: 700, fontSize: 15, margin: '8px 0 4px' }}>Check your email</div>
+            <div style={{ fontSize: 13, color: C.greyMid }}>We've sent a password reset link to <strong>{email}</strong>. Click it, and you'll be brought back here to set a new password.</div>
+          </div>
+        ) : (
+          <form onSubmit={handleEmail}>
+            {mode === 'signup' && (
+              <input style={S.input} type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+            )}
+            <input style={S.input} type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+            {mode !== 'forgot' && (
+              <input style={S.input} type="password" placeholder="Password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+            )}
+            <button style={{ ...S.primary, opacity: loading ? 0.6 : 1 }} type="submit" disabled={loading}>
+              {loading ? 'Loading...' : mode === 'signup' ? 'Create Account' : mode === 'forgot' ? 'Send Reset Link' : 'Log In'}
+            </button>
+          </form>
+        )}
 
         <div style={S.toggle}>
-          {mode === 'signup' ? (
+          {mode === 'signup' && (
             <>Already have an account? <span style={S.link} onClick={() => { setMode('login'); setError(''); }}>Log in</span></>
-          ) : (
-            <>New to PT:U? <span style={S.link} onClick={() => { setMode('signup'); setError(''); }}>Create an account</span></>
+          )}
+          {mode === 'login' && (
+            <>New to PT:U? <span style={S.link} onClick={() => { setMode('signup'); setError(''); }}>Create an account</span>
+            <div style={{ marginTop: 8 }}><span style={S.link} onClick={() => { setMode('forgot'); setError(''); setResetSent(false); }}>Forgot your password?</span></div></>
+          )}
+          {mode === 'forgot' && (
+            <><span style={S.link} onClick={() => { setMode('login'); setError(''); setResetSent(false); }}>← Back to log in</span></>
           )}
         </div>
       </div>
