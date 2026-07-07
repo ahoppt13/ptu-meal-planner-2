@@ -29,7 +29,7 @@ export default async (req) => {
     const dietNote = diet && diet !== "no-restrictions" ? `The recipe must be suitable for a ${diet} diet.` : "";
 
     const instruction = `You are the PT:U recipe creator — a UK personal training brand focused on evidence-based, high-protein, practical meals using UK supermarket ingredients (grams/ml).
-${image ? "First, identify the food ingredients visible in the photo. " : ""}Create ONE realistic recipe using mainly the user's available ingredients${image ? " from the photo" : ""}${ingredients ? ` (they listed: ${ingredients})` : ""}. You may assume basic store-cupboard items (oil, salt, pepper, common dried spices). Prioritise protein. Aim for roughly ${targetCal || 500} kcal per portion.
+${image ? "First, identify the food ingredients visible in the photo. " : ""}Create ONE realistic recipe using STRICTLY ONLY the user's available ingredients${image ? " from the photo" : ""}${ingredients ? ` (they listed: ${ingredients})` : ""}, plus these basic staples if useful: olive oil, salt, black pepper, dried herbs and spices, garlic, and a squeeze of lemon or vinegar. Do NOT add ANY other ingredients — no extra proteins, vegetables, dairy, sauces, or carbs that the user did not list. If the listed ingredients are limited, keep the recipe simple rather than adding things. Prioritise protein. Aim for roughly ${targetCal || 500} kcal per portion.
 ${dietNote}
 ${allergenNote}
 Respond with ONLY valid JSON, no markdown fences, in exactly this shape:
