@@ -618,6 +618,62 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
     return results.slice(0, 20);
   }, [fridgeInput, form.diet, form.allergens, form.conditions, hiddenMeals]);
 
+  // ── AI Chef (logged-in users): generate an original recipe from ingredients ──
+  const [fridgeTab, setFridgeTab] = useState("match"); // "match" | "ai"
+  const [aiInput, setAiInput] = useState("");
+  const [aiImage, setAiImage] = useState(null); // { data, type, preview }
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiRecipe, setAiRecipe] = useState(null);
+  const [aiError, setAiError] = useState("");
+
+  const handleAiPhoto = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize to max 1024px to keep uploads fast and costs low
+        const scale = Math.min(1, 1024 / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setAiImage({ data: dataUrl.split(",")[1], type: "image/jpeg", preview: dataUrl });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const generateAiRecipe = async () => {
+    if (aiLoading || (!aiInput.trim() && !aiImage)) return;
+    setAiLoading(true); setAiError(""); setAiRecipe(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const calSplit = form.mealsPerDay === 4 ? 0.30 : 0.35;
+      const res = await fetch("/.netlify/functions/generate-recipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: session?.access_token,
+          ingredients: aiInput.trim(),
+          image: aiImage?.data,
+          imageType: aiImage?.type,
+          targetCal: Math.round(target * calSplit) || 500,
+          diet: form.diet,
+          allergens: form.allergens,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setAiError(data.error || "Something went wrong — please try again."); }
+      else setAiRecipe(data.recipe);
+    } catch (e) {
+      setAiError("Couldn't reach the AI Chef — check your connection and try again.");
+    }
+    setAiLoading(false);
+  };
+
   const shoppingList = plan ? buildShoppingList(plan, form.people) : [];
   const [checkedItems, setCheckedItems] = useState({});
 
@@ -728,6 +784,61 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
               <div style={{ fontSize: 20, fontWeight: 800 }}>🧊 What's in my fridge?</div>
               <span style={{ cursor: "pointer", fontSize: 22, color: C.greyMid }} onClick={() => setFridgeOpen(false)}>×</span>
             </div>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+              <button onClick={() => setFridgeTab("match")} style={{ flex: 1, padding: "9px 0", borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", border: `1.5px solid ${fridgeTab === "match" ? C.green : C.greyBorder}`, background: fridgeTab === "match" ? C.greenLight : C.white, color: fridgeTab === "match" ? C.greenDark : C.greyMid }}>🔍 Match my meals</button>
+              <button onClick={() => setFridgeTab("ai")} style={{ flex: 1, padding: "9px 0", borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", border: `1.5px solid ${fridgeTab === "ai" ? C.green : C.greyBorder}`, background: fridgeTab === "ai" ? C.greenLight : C.white, color: fridgeTab === "ai" ? C.greenDark : C.greyMid }}>✨ AI Chef</button>
+            </div>
+
+            {fridgeTab === "ai" && (
+              <div>
+                {!user ? (
+                  <div style={{ textAlign: "center", padding: "20px 10px" }}>
+                    <div style={{ fontSize: 32 }}>✨</div>
+                    <div style={{ fontWeight: 700, fontSize: 15, margin: "8px 0 4px" }}>AI Chef is a free member feature</div>
+                    <div style={{ fontSize: 13, color: C.greyMid, marginBottom: 14 }}>Sign up free and the AI Chef will turn whatever's in your fridge — typed or photographed — into a recipe built around your goals.</div>
+                    <button onClick={() => { setFridgeOpen(false); onExitGuest(); }} style={{ padding: "12px 22px", background: C.green, color: C.white, border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Sign Up Free</button>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 12, color: C.greyMid, marginBottom: 10 }}>Type your ingredients and/or add a photo — the AI Chef will create a recipe around your calorie target, diet and allergens.</div>
+                    <textarea value={aiInput} onChange={e => setAiInput(e.target.value)} placeholder="e.g. chicken thighs, half a courgette, feta, leftover rice" rows={2}
+                      style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: `1.5px solid ${C.greyBorder}`, borderRadius: 8, fontSize: 14, fontFamily: "inherit", resize: "vertical", marginBottom: 8 }} />
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+                      <label style={{ padding: "9px 14px", border: `1.5px solid ${C.greyBorder}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", color: C.dark }}>
+                        📷 {aiImage ? "Change photo" : "Add photo"}
+                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleAiPhoto(e.target.files[0])} />
+                      </label>
+                      {aiImage && <img src={aiImage.preview} alt="ingredients" style={{ height: 40, borderRadius: 6 }} />}
+                      {aiImage && <span onClick={() => setAiImage(null)} style={{ cursor: "pointer", color: C.greyMid, fontSize: 18 }}>×</span>}
+                      <button onClick={generateAiRecipe} disabled={aiLoading || (!aiInput.trim() && !aiImage)} style={{ marginLeft: "auto", padding: "10px 18px", background: aiLoading || (!aiInput.trim() && !aiImage) ? C.greyBorder : C.green, color: C.white, border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{aiLoading ? "Cooking..." : "✨ Create Recipe"}</button>
+                    </div>
+                    {aiError && <div style={{ background: "#fee", color: "#c00", padding: 10, borderRadius: 8, fontSize: 12, marginBottom: 10 }}>{aiError}</div>}
+                    {aiLoading && <div style={{ textAlign: "center", padding: 18, color: C.greyMid, fontSize: 13 }}>The AI Chef is thinking through your ingredients...</div>}
+                    {aiRecipe && (
+                      <div style={{ background: C.grey, borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontWeight: 800, fontSize: 17 }}>{aiRecipe.name}</div>
+                        <div style={{ fontSize: 13, color: "#555", margin: "4px 0 8px" }}>{aiRecipe.description}</div>
+                        <div style={{ fontSize: 12, color: C.greyMid, marginBottom: 10 }}>
+                          {aiRecipe.cal} kcal | P: {aiRecipe.protein}g | C: {aiRecipe.carbs}g | F: {aiRecipe.fat}g{aiRecipe.fibre ? ` | Fibre: ${aiRecipe.fibre}g` : ""}{aiRecipe.prepTime ? ` | ⏱ ${aiRecipe.prepTime} min` : ""}
+                          <span style={{ display: "block", marginTop: 2, fontSize: 10 }}>AI-estimated macros — treat as a guide</span>
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Ingredients</div>
+                        <div style={{ fontSize: 12, color: "#555", lineHeight: 1.8, marginBottom: 8 }}>
+                          {(aiRecipe.ingredients || []).map((ing, i) => <div key={i}>• {ing.qty} {ing.item}</div>)}
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Method</div>
+                        <div style={{ fontSize: 13, color: "#444", lineHeight: 1.7 }}>
+                          {(aiRecipe.steps || []).map((s, i) => <div key={i} style={{ marginBottom: 4 }}><strong>{i + 1}.</strong> {s}</div>)}
+                        </div>
+                        <button onClick={generateAiRecipe} style={{ marginTop: 12, padding: "9px 16px", background: C.white, color: C.green, border: `1.5px solid ${C.green}`, borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>🔄 Try another idea</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {fridgeTab === "match" && (<div>
             <div style={{ fontSize: 12, color: C.greyMid, marginBottom: 10 }}>List your ingredients (separated by commas) and we'll find meals you can make.</div>
             <textarea value={fridgeInput} onChange={e => setFridgeInput(e.target.value)} placeholder="e.g. chicken, rice, broccoli, eggs, greek yogurt" rows={3}
               style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: `1.5px solid ${C.greyBorder}`, borderRadius: 8, fontSize: 14, fontFamily: "inherit", resize: "vertical", marginBottom: 12 }} />
@@ -766,6 +877,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 </div>
               );
             })}
+            </div>)}
           </div>
         </div>
       )}
