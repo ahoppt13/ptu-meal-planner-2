@@ -454,6 +454,11 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
     ...f, conditions: c === "none" ? [] : f.conditions.includes(c) ? f.conditions.filter(x => x !== c) : [...f.conditions.filter(x => x !== "none"), c]
   }));
 
+  // Body stats must be present and physiologically sensible before calculating
+  const validStats = Number(form.age) >= 16 && Number(form.age) <= 90
+    && Number(form.weight) >= 35 && Number(form.weight) <= 300
+    && Number(form.height) >= 120 && Number(form.height) <= 230;
+
   const bmr = calcBMR(Number(form.age), form.gender, Number(form.weight), Number(form.height), form.unit);
   const tdee = calcTDEE(bmr, form.activity);
   const target = goalCalories(tdee, form.goal);
@@ -770,7 +775,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
 
   const canNext = () => {
     if (step === 0) return form.name && form.email && form.emailConfirm && form.email === form.emailConfirm && form.healthGoal;
-    if (step === 1) return form.age && form.weight && form.height;
+    if (step === 1) return validStats;
     return true;
   };
 
@@ -1322,7 +1327,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
         </div>
 
         <div style={{ textAlign: "center", fontSize: 10, color: "#bbb", marginTop: 16, lineHeight: 1.5 }}>
-          PT:U Personal Training | www.pt-u.co.uk<br />
+          PT:U Personal Training | www.pt-u.co.uk | <a href="/privacy.html" target="_blank" style={{ color: "#999" }}>Privacy Policy</a><br />
           Calorie estimates use the Mifflin-St Jeor equation. Protein targets based on ISSN position stand (1.6-2.0g/kg/day).<br />
           Health condition guidance informed by peer-reviewed research from NCBI/PubMed. Always consult a healthcare professional.
         </div>

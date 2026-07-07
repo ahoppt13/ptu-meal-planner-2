@@ -109,6 +109,9 @@ export default function Auth({ onAuth, onGuest }) {
             <><span style={S.link} onClick={() => { setMode('login'); setError(''); setResetSent(false); }}>← Back to log in</span></>
           )}
         </div>
+        <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11 }}>
+          <a href="/privacy.html" target="_blank" style={{ color: '#bbb' }}>Privacy Policy</a>
+        </div>
       </div>
     </div>
   );
