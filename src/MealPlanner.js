@@ -52,8 +52,8 @@ const MEALS = {
     { name: "Overnight Protein Oats (Chocolate PB)", cal: 410, protein: 30, carbs: 45, fat: 14, tags: ["no-restrictions"], health: ["low_sodium","high_fibre","low_gi"], allergens: ["gluten","dairy","nuts"], recipe: "Night before: Mix 60g rolled oats, 200ml milk, 1 scoop chocolate whey protein, 1 tbsp peanut butter. Refrigerate overnight. Morning: stir, top with sliced banana. Grab and go.", ingredients: [{ item: "Rolled oats", qty: "60g" },{ item: "Milk", qty: "200ml" },{ item: "Chocolate whey protein", qty: "30g" },{ item: "Peanut butter", qty: "1 tbsp" },{ item: "Banana", qty: "1/2" }] },
     { name: "Turkey Sausage & Egg Muffins (Batch Prep)", cal: 400, protein: 32, carbs: 10, fat: 26, tags: ["no-restrictions"], health: ["low_sodium","low_gi"], allergens: ["eggs"], recipe: "Batch prep: Brown 150g turkey sausage meat. Mix with 4 beaten eggs, diced peppers and spinach. Pour into muffin tin. Bake 180°C 20 mins. Store in fridge up to 4 days. Morning: microwave 60 seconds.", ingredients: [{ item: "Turkey sausage meat", qty: "150g" },{ item: "Eggs", qty: "4" },{ item: "Bell pepper", qty: "1/2" },{ item: "Spinach", qty: "50g" }] },
     // ── KETO (Quick) ──
-    { name: "Keto Scrambled Eggs & Avocado", cal: 390, protein: 22, carbs: 4, fat: 32, tags: ["keto","no-restrictions"], health: ["low_sodium","low_gi"], allergens: ["eggs"], recipe: "Scramble 3 eggs in 10g butter (2 mins). Halve an avocado, season with salt, pepper and chilli flakes. Serve together. Under 4 mins.", ingredients: [{ item: "Eggs", qty: "3" },{ item: "Butter", qty: "10g" },{ item: "Avocado", qty: "1/2" },{ item: "Chilli flakes", qty: "pinch" }] },
-    { name: "Keto Greek Yogurt & Nut Bowl", cal: 350, protein: 24, carbs: 8, fat: 26, tags: ["keto","no-restrictions"], health: ["low_sodium","low_gi"], allergens: ["dairy","nuts"], recipe: "Spoon 200g full-fat Greek yogurt into a bowl. Top with 25g mixed nuts, 10g coconut flakes, and a few berries. Under 2 mins.", ingredients: [{ item: "Full-fat Greek yogurt", qty: "200g" },{ item: "Mixed nuts", qty: "25g" },{ item: "Coconut flakes", qty: "10g" },{ item: "Blueberries", qty: "30g" }] },
+    { name: "Keto Scrambled Eggs & Avocado", cal: 390, protein: 22, carbs: 4, fibre: 5, fat: 32, tags: ["keto","no-restrictions"], health: ["low_sodium","low_gi"], allergens: ["eggs"], recipe: "Scramble 3 eggs in 10g butter (2 mins). Halve an avocado, season with salt, pepper and chilli flakes. Serve together. Under 4 mins.", ingredients: [{ item: "Eggs", qty: "3" },{ item: "Butter", qty: "10g" },{ item: "Avocado", qty: "1/2" },{ item: "Chilli flakes", qty: "pinch" }] },
+    { name: "Keto Greek Yogurt & Nut Bowl", cal: 350, protein: 24, carbs: 8, fibre: 4, fat: 26, tags: ["keto","no-restrictions"], health: ["low_sodium","low_gi"], allergens: ["dairy","nuts"], recipe: "Spoon 200g full-fat Greek yogurt into a bowl. Top with 25g mixed nuts, 10g coconut flakes, and a few berries. Under 2 mins.", ingredients: [{ item: "Full-fat Greek yogurt", qty: "200g" },{ item: "Mixed nuts", qty: "25g" },{ item: "Coconut flakes", qty: "10g" },{ item: "Blueberries", qty: "30g" }] },
     // ── VEGETARIAN ONLY ──
     { name: "Veggie Protein Smoothie Bowl", cal: 400, protein: 30, carbs: 45, fat: 10, tags: ["vegetarian"], health: ["low_sodium","low_sat_fat"], allergens: ["dairy","nuts"], recipe: "Blend 1 scoop whey protein, 1 frozen banana, 100g frozen berries, 150ml almond milk until thick. Top with 30g granola and 10g coconut. Under 4 mins.", ingredients: [{ item: "Whey protein powder", qty: "30g" },{ item: "Frozen banana", qty: "1" },{ item: "Frozen berries", qty: "100g" },{ item: "Almond milk", qty: "150ml" },{ item: "Granola", qty: "30g" },{ item: "Coconut flakes", qty: "10g" }] },
     // ── VEGAN ONLY ──
@@ -77,8 +77,8 @@ const MEALS = {
     { name: "PT:U Thai Beef Salad", cal: 374, protein: 55, carbs: 7, fat: 14, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["soy"], recipe: "From PT:U Recipe Book. Marinate 125g rump steak in olive oil, tamari and chilli flakes 10 mins. Griddle 3-4 mins each side. Rest 5 mins, slice. Serve over bell pepper, cucumber, carrot matchsticks and rocket.", ingredients: [{ item: "Beef rump steak", qty: "125g" },{ item: "Olive oil", qty: "1/2 tsp" },{ item: "Tamari", qty: "1/2 tbsp" },{ item: "Chilli flakes", qty: "1/2 tsp" },{ item: "Bell pepper", qty: "1/4" },{ item: "Cucumber", qty: "1/4" },{ item: "Carrot", qty: "1/4" },{ item: "Rocket", qty: "20g" }] },
     { name: "PT:U Beef & Sushi Rice Bowl", cal: 574, protein: 38, carbs: 65, fat: 18, tags: ["no-restrictions"], health: ["low_sat_fat"], allergens: ["soy"], recipe: "From PT:U Recipe Book. Cook 75g sushi rice. Fry 150g rump steak, rest and slice. Stir-fry pepper, red onion, cucumber and garlic with soy and rice wine vinegar. Toss with rice, mint and steak.", ingredients: [{ item: "Sushi rice", qty: "75g" },{ item: "Rump steak", qty: "150g" },{ item: "Olive oil", qty: "1/2 tbsp" },{ item: "Bell pepper", qty: "1/2" },{ item: "Red onion", qty: "1/4" },{ item: "Cucumber", qty: "1/4" },{ item: "Garlic", qty: "1 clove" },{ item: "Soy sauce", qty: "1/2 tsp" },{ item: "Rice wine vinegar", qty: "1 tsp" },{ item: "Mint leaves", qty: "12g" }] },
     // ── KETO ──
-    { name: "Keto Chicken Lettuce Wraps", cal: 420, protein: 38, carbs: 6, fat: 26, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["soy"], recipe: "Cook 220g chicken mince with garlic, ginger, soy sauce, sesame oil. Spoon into lettuce cups. Top with spring onions.", ingredients: [{ item: "Chicken mince", qty: "220g" },{ item: "Butter lettuce", qty: "1 head" },{ item: "Garlic", qty: "2 cloves" },{ item: "Ginger", qty: "1 tsp" },{ item: "Soy sauce (reduced salt)", qty: "2 tbsp" },{ item: "Sesame oil", qty: "1 tsp" },{ item: "Spring onions", qty: "3" }] },
-    { name: "Keto Beef Taco Bowl", cal: 460, protein: 38, carbs: 8, fat: 30, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Brown 220g lean beef mince with taco seasoning. Serve over lettuce with sour cream, guacamole, cheese, salsa.", ingredients: [{ item: "Lean beef mince", qty: "220g" },{ item: "Taco seasoning", qty: "1 tbsp" },{ item: "Iceberg lettuce", qty: "1/2 head" },{ item: "Sour cream", qty: "2 tbsp" },{ item: "Avocado", qty: "1/2" },{ item: "Cheddar cheese", qty: "30g" },{ item: "Salsa", qty: "2 tbsp" }] },
+    { name: "Keto Chicken Lettuce Wraps", cal: 420, protein: 38, carbs: 6, fibre: 2, fat: 26, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["soy"], recipe: "Cook 220g chicken mince with garlic, ginger, soy sauce, sesame oil. Spoon into lettuce cups. Top with spring onions.", ingredients: [{ item: "Chicken mince", qty: "220g" },{ item: "Butter lettuce", qty: "1 head" },{ item: "Garlic", qty: "2 cloves" },{ item: "Ginger", qty: "1 tsp" },{ item: "Soy sauce (reduced salt)", qty: "2 tbsp" },{ item: "Sesame oil", qty: "1 tsp" },{ item: "Spring onions", qty: "3" }] },
+    { name: "Keto Beef Taco Bowl", cal: 460, protein: 38, carbs: 8, fibre: 6, fat: 30, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Brown 220g lean beef mince with taco seasoning. Serve over lettuce with sour cream, guacamole, cheese, salsa.", ingredients: [{ item: "Lean beef mince", qty: "220g" },{ item: "Taco seasoning", qty: "1 tbsp" },{ item: "Iceberg lettuce", qty: "1/2 head" },{ item: "Sour cream", qty: "2 tbsp" },{ item: "Avocado", qty: "1/2" },{ item: "Cheddar cheese", qty: "30g" },{ item: "Salsa", qty: "2 tbsp" }] },
     // ── VEGAN ONLY ──
     { name: "Mediterranean Lentil Soup", cal: 380, protein: 22, carbs: 55, fat: 8, tags: ["vegan","vegetarian"], health: ["low_sodium","high_fibre","low_gi","low_sat_fat"], allergens: [], recipe: "Sauté onion, carrot, celery. Add red lentils, tomatoes, stock, cumin, turmeric. Simmer 25 mins. Lemon to serve.", ingredients: [{ item: "Red lentils", qty: "120g" },{ item: "Onion", qty: "1" },{ item: "Carrot", qty: "2" },{ item: "Celery", qty: "2 sticks" },{ item: "Canned tomatoes", qty: "400g" },{ item: "Vegetable stock (low sodium)", qty: "500ml" },{ item: "Cumin", qty: "1 tsp" },{ item: "Turmeric", qty: "1/2 tsp" },{ item: "Lemon", qty: "1" }] },
     { name: "Vegan Chickpea & Spinach Wrap", cal: 420, protein: 18, carbs: 55, fat: 14, tags: ["vegan","vegetarian"], health: ["low_sodium","high_fibre","low_gi","low_sat_fat"], allergens: ["gluten","sesame"], recipe: "Mash chickpeas with tahini, lemon, cumin. Fill wholegrain wrap with chickpea mix, spinach, tomato, red onion.", ingredients: [{ item: "Chickpeas (canned)", qty: "200g" },{ item: "Tahini", qty: "1 tbsp" },{ item: "Lemon", qty: "1/2" },{ item: "Cumin", qty: "1/2 tsp" },{ item: "Wholegrain wrap", qty: "1" },{ item: "Spinach", qty: "50g" },{ item: "Tomato", qty: "1" },{ item: "Red onion", qty: "1/4" }] },
@@ -106,22 +106,22 @@ const MEALS = {
     { name: "PT:U Dijon Baked Salmon", cal: 363, protein: 37, carbs: 1, fat: 23, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["fish"], recipe: "From PT:U Recipe Book. Place salmon fillet skin-side down on lined tray. Mix parsley, lemon juice, Dijon mustard, olive oil, salt and pepper. Spread over salmon, top with lemon slices. Bake 220°C 12-15 mins. Serve with green salad.", ingredients: [{ item: "Salmon fillet", qty: "1 large" },{ item: "Fresh parsley", qty: "1/2 tbsp" },{ item: "Lemon juice", qty: "1/2 tbsp" },{ item: "Dijon mustard", qty: "1 tsp" },{ item: "Olive oil", qty: "1/2 tsp" },{ item: "Lemon slices", qty: "2" }] },
     { name: "PT:U Red Curry Chicken with Noodles", cal: 413, protein: 20, carbs: 30, fat: 24, tags: ["no-restrictions"], health: ["low_sodium"], allergens: ["soy"], recipe: "From PT:U Recipe Book. Cook 75g rice noodles. Fry 1 chicken thigh in olive oil with honey until golden (15 mins). Simmer curry sauce: red curry paste, garlic, spring onion, chicken stock and coconut milk 5 mins. Serve over noodles.", ingredients: [{ item: "Rice noodles", qty: "75g" },{ item: "Chicken thigh", qty: "1" },{ item: "Olive oil", qty: "1/4 tbsp" },{ item: "Honey", qty: "1/2 tbsp" },{ item: "Red curry paste", qty: "1/2 tbsp" },{ item: "Garlic", qty: "1/4 clove" },{ item: "Spring onion", qty: "1" },{ item: "Chicken stock", qty: "31ml" },{ item: "Coconut milk", qty: "50ml" }] },
     // ── KETO ──
-    { name: "Keto Garlic Butter Steak & Asparagus", cal: 560, protein: 45, carbs: 5, fat: 40, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Pan-sear 220g sirloin steak. Cook asparagus in garlic butter with thyme. Rest steak 5 mins before slicing.", ingredients: [{ item: "Sirloin steak", qty: "220g" },{ item: "Asparagus", qty: "200g" },{ item: "Butter", qty: "25g" },{ item: "Garlic", qty: "3 cloves" },{ item: "Fresh thyme", qty: "2 sprigs" }] },
-    { name: "Keto Creamy Tuscan Chicken", cal: 530, protein: 42, carbs: 6, fat: 38, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Pan-fry 220g chicken. Cook garlic, sun-dried tomatoes, spinach. Add cream and parmesan. Return chicken. Serve with cauliflower mash.", ingredients: [{ item: "Chicken breast", qty: "220g" },{ item: "Sun-dried tomatoes", qty: "30g" },{ item: "Spinach", qty: "100g" },{ item: "Double cream", qty: "60ml" },{ item: "Parmesan", qty: "25g" },{ item: "Cauliflower", qty: "200g" }] },
+    { name: "Keto Garlic Butter Steak & Asparagus", cal: 560, protein: 45, carbs: 5, fibre: 4, fat: 40, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Pan-sear 220g sirloin steak. Cook asparagus in garlic butter with thyme. Rest steak 5 mins before slicing.", ingredients: [{ item: "Sirloin steak", qty: "220g" },{ item: "Asparagus", qty: "200g" },{ item: "Butter", qty: "25g" },{ item: "Garlic", qty: "3 cloves" },{ item: "Fresh thyme", qty: "2 sprigs" }] },
+    { name: "Keto Creamy Tuscan Chicken", cal: 530, protein: 42, carbs: 6, fibre: 4, fat: 38, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy"], recipe: "Pan-fry 220g chicken. Cook garlic, sun-dried tomatoes, spinach. Add cream and parmesan. Return chicken. Serve with cauliflower mash.", ingredients: [{ item: "Chicken breast", qty: "220g" },{ item: "Sun-dried tomatoes", qty: "30g" },{ item: "Spinach", qty: "100g" },{ item: "Double cream", qty: "60ml" },{ item: "Parmesan", qty: "25g" },{ item: "Cauliflower", qty: "200g" }] },
     // ── VEGAN ONLY ──
     { name: "Vegan Chickpea Curry", cal: 450, protein: 18, carbs: 60, fat: 14, tags: ["vegan","vegetarian"], health: ["low_sodium","high_fibre","low_gi","low_sat_fat"], allergens: [], recipe: "Sauté onion, garlic, ginger. Add curry powder, cumin, turmeric, chickpeas, coconut milk, spinach. Simmer 20 mins. Serve with brown rice.", ingredients: [{ item: "Chickpeas (canned)", qty: "400g" },{ item: "Coconut milk (light)", qty: "200ml" },{ item: "Onion", qty: "1" },{ item: "Garlic", qty: "3 cloves" },{ item: "Ginger", qty: "1 tbsp" },{ item: "Spinach", qty: "100g" },{ item: "Curry powder", qty: "2 tbsp" },{ item: "Brown rice", qty: "120g" }] },
     { name: "Vegan Lentil Bolognese", cal: 440, protein: 22, carbs: 60, fat: 10, tags: ["vegan","vegetarian"], health: ["low_sodium","high_fibre","low_gi","low_sat_fat"], allergens: ["gluten"], recipe: "Cook 120g puy lentils. Sauté onion, garlic, carrot, celery. Add tomatoes and lentils. Simmer 20 mins. Serve over wholegrain spaghetti.", ingredients: [{ item: "Puy lentils", qty: "120g" },{ item: "Onion", qty: "1" },{ item: "Garlic", qty: "2 cloves" },{ item: "Carrot", qty: "1" },{ item: "Celery", qty: "1 stick" },{ item: "Canned tomatoes", qty: "400g" },{ item: "Wholegrain spaghetti", qty: "100g" }] },
   ],
   snack: [
     // ── UNPROCESSED / HIGH PROTEIN (no-restrictions) ──
-    { name: "Boiled Eggs & Cherry Tomatoes", cal: 150, protein: 13, carbs: 5, fat: 9, tags: ["no-restrictions","keto"], health: ["low_sodium","low_gi"], allergens: ["eggs"], recipe: "Boil 2 eggs 8 mins. Serve with cherry tomatoes.", ingredients: [{ item: "Eggs", qty: "2" },{ item: "Cherry tomatoes", qty: "80g" }] },
+    { name: "Boiled Eggs & Cherry Tomatoes", cal: 150, protein: 13, carbs: 5, fibre: 1, fat: 9, tags: ["no-restrictions","keto"], health: ["low_sodium","low_gi"], allergens: ["eggs"], recipe: "Boil 2 eggs 8 mins. Serve with cherry tomatoes.", ingredients: [{ item: "Eggs", qty: "2" },{ item: "Cherry tomatoes", qty: "80g" }] },
     { name: "Cottage Cheese & Berries", cal: 160, protein: 18, carbs: 15, fat: 4, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["dairy"], recipe: "Top 150g cottage cheese with 80g mixed berries.", ingredients: [{ item: "Cottage cheese", qty: "150g" },{ item: "Mixed berries", qty: "80g" }] },
     { name: "Greek Yogurt & Walnuts", cal: 200, protein: 16, carbs: 12, fat: 10, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["dairy","nuts"], recipe: "Top 150g Greek yogurt with 20g crushed walnuts and a drizzle of honey.", ingredients: [{ item: "Greek yogurt", qty: "150g" },{ item: "Walnuts", qty: "20g" },{ item: "Honey", qty: "1 tsp" }] },
     { name: "Turkey & Cucumber Roll-Ups", cal: 140, protein: 18, carbs: 4, fat: 6, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: [], recipe: "Wrap 80g sliced turkey breast around cucumber sticks with a smear of mustard.", ingredients: [{ item: "Sliced turkey breast", qty: "80g" },{ item: "Cucumber", qty: "1/2" },{ item: "Wholegrain mustard", qty: "1 tsp" }] },
     { name: "Protein Energy Balls", cal: 180, protein: 12, carbs: 20, fat: 8, tags: ["no-restrictions"], health: ["low_sodium"], allergens: ["nuts","dairy"], recipe: "Mix 100g oats, 60g whey protein, 3 tbsp peanut butter, 2 tbsp honey. Roll into 8 balls. Refrigerate.", ingredients: [{ item: "Rolled oats", qty: "100g" },{ item: "Whey protein powder", qty: "60g" },{ item: "Peanut butter", qty: "3 tbsp" },{ item: "Honey", qty: "2 tbsp" }] },
-    { name: "Beef Jerky & Mixed Nuts", cal: 210, protein: 20, carbs: 8, fat: 12, tags: ["no-restrictions","keto"], health: ["low_gi"], allergens: ["nuts"], recipe: "Serve 50g lean beef jerky with 20g mixed nuts.", ingredients: [{ item: "Lean beef jerky", qty: "50g" },{ item: "Mixed nuts", qty: "20g" }] },
+    { name: "Beef Jerky & Mixed Nuts", cal: 210, protein: 20, carbs: 8, fibre: 2, fat: 12, tags: ["no-restrictions","keto"], health: ["low_gi"], allergens: ["nuts"], recipe: "Serve 50g lean beef jerky with 20g mixed nuts.", ingredients: [{ item: "Lean beef jerky", qty: "50g" },{ item: "Mixed nuts", qty: "20g" }] },
     // ── KETO ──
-    { name: "Keto Cheese & Nuts", cal: 220, protein: 12, carbs: 3, fat: 18, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy","nuts"], recipe: "Serve 40g mixed cheese cubes with 25g mixed nuts.", ingredients: [{ item: "Mixed cheese", qty: "40g" },{ item: "Mixed nuts", qty: "25g" }] },
+    { name: "Keto Cheese & Nuts", cal: 220, protein: 12, carbs: 3, fibre: 2, fat: 18, tags: ["keto","no-restrictions"], health: ["low_gi"], allergens: ["dairy","nuts"], recipe: "Serve 40g mixed cheese cubes with 25g mixed nuts.", ingredients: [{ item: "Mixed cheese", qty: "40g" },{ item: "Mixed nuts", qty: "25g" }] },
     // ── VEGAN ONLY ──
     { name: "Hummus & Veggie Sticks", cal: 170, protein: 6, carbs: 22, fat: 7, tags: ["vegan","vegetarian"], health: ["low_sodium","high_fibre","low_gi","low_sat_fat"], allergens: ["sesame"], recipe: "Serve 60g hummus with carrot, cucumber, and pepper sticks.", ingredients: [{ item: "Hummus", qty: "60g" },{ item: "Carrots", qty: "1" },{ item: "Cucumber", qty: "1/2" },{ item: "Bell pepper", qty: "1" }] },
     { name: "Vegan Edamame & Seeds", cal: 190, protein: 14, carbs: 12, fat: 10, tags: ["vegan","vegetarian"], health: ["low_sodium","low_gi","low_sat_fat","high_fibre"], allergens: ["soy"], recipe: "Steam 100g edamame. Toss with pumpkin seeds and a squeeze of lime.", ingredients: [{ item: "Edamame", qty: "100g" },{ item: "Pumpkin seeds", qty: "15g" },{ item: "Lime", qty: "1/2" }] },
@@ -134,15 +134,15 @@ const MEALS = {
     { name: "Greek Yogurt 0% Fat", cal: 80, protein: 15, carbs: 5, fat: 0, tags: ["no-restrictions","vegetarian"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["dairy"], recipe: "Serve 150g 0% fat Greek yogurt. Add a pinch of cinnamon or a few berries if desired.", ingredients: [{ item: "0% Greek yogurt", qty: "150g" }] },
     { name: "Cottage Cheese", cal: 90, protein: 12, carbs: 5, fat: 2, tags: ["no-restrictions","vegetarian"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["dairy"], recipe: "Serve 120g cottage cheese. Season with black pepper or top with pineapple.", ingredients: [{ item: "Cottage cheese", qty: "120g" }] },
     { name: "Tuna Pouch", cal: 70, protein: 17, carbs: 0, fat: 1, tags: ["no-restrictions"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["fish"], recipe: "Open a single-serve tuna pouch in spring water. Eat straight or on rice cakes.", ingredients: [{ item: "Tuna pouch (spring water)", qty: "1 pouch" }] },
-    { name: "Beef Jerky", cal: 80, protein: 11, carbs: 3, fat: 1, tags: ["no-restrictions","keto"], health: ["low_gi"], allergens: [], recipe: "Serve 28g lean beef jerky as a high-protein on-the-go snack.", ingredients: [{ item: "Lean beef jerky", qty: "28g" }] },
-    { name: "Biltong", cal: 75, protein: 15, carbs: 1, fat: 1, tags: ["no-restrictions","keto"], health: ["low_gi","low_sat_fat"], allergens: [], recipe: "Serve 28g biltong. A great low-carb, high-protein snack.", ingredients: [{ item: "Biltong", qty: "28g" }] },
-    { name: "Almonds", cal: 160, protein: 6, carbs: 6, fat: 14, tags: ["no-restrictions","vegan","vegetarian","keto"], health: ["low_gi","low_sat_fat"], allergens: ["nuts"], recipe: "Serve a small handful (28g) of raw or dry-roasted almonds.", ingredients: [{ item: "Almonds", qty: "28g" }] },
+    { name: "Beef Jerky", cal: 80, protein: 11, carbs: 3, fibre: 0, fat: 1, tags: ["no-restrictions","keto"], health: ["low_gi"], allergens: [], recipe: "Serve 28g lean beef jerky as a high-protein on-the-go snack.", ingredients: [{ item: "Lean beef jerky", qty: "28g" }] },
+    { name: "Biltong", cal: 75, protein: 15, carbs: 1, fibre: 0, fat: 1, tags: ["no-restrictions","keto"], health: ["low_gi","low_sat_fat"], allergens: [], recipe: "Serve 28g biltong. A great low-carb, high-protein snack.", ingredients: [{ item: "Biltong", qty: "28g" }] },
+    { name: "Almonds", cal: 160, protein: 6, carbs: 6, fibre: 3, fat: 14, tags: ["no-restrictions","vegan","vegetarian","keto"], health: ["low_gi","low_sat_fat"], allergens: ["nuts"], recipe: "Serve a small handful (28g) of raw or dry-roasted almonds.", ingredients: [{ item: "Almonds", qty: "28g" }] },
     { name: "Porridge (Oatmeal)", cal: 150, protein: 5, carbs: 27, fat: 3, tags: ["no-restrictions","vegan","vegetarian"], health: ["high_fibre","low_gi","low_sat_fat","low_sodium"], allergens: ["gluten"], recipe: "Cook 40g rolled oats with 200ml water. Add cinnamon or honey to taste.", ingredients: [{ item: "Rolled oats", qty: "40g" },{ item: "Water", qty: "200ml" }] },
     { name: "Apple & String Cheese", cal: 175, protein: 7, carbs: 25, fat: 6, tags: ["no-restrictions","vegetarian"], health: ["low_sodium","low_gi"], allergens: ["dairy"], recipe: "Serve 1 apple sliced with 1 piece of light string cheese.", ingredients: [{ item: "Apple", qty: "1" },{ item: "String cheese", qty: "1 piece" }] },
-    { name: "Turkey Breast Slices", cal: 120, protein: 22, carbs: 0, fat: 3, tags: ["no-restrictions","keto"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: [], recipe: "Serve 112g sliced lean turkey breast. Roll around cucumber sticks for extra crunch.", ingredients: [{ item: "Sliced turkey breast", qty: "112g" }] },
+    { name: "Turkey Breast Slices", cal: 120, protein: 22, carbs: 0, fibre: 0, fat: 3, tags: ["no-restrictions","keto"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: [], recipe: "Serve 112g sliced lean turkey breast. Roll around cucumber sticks for extra crunch.", ingredients: [{ item: "Sliced turkey breast", qty: "112g" }] },
     { name: "Skyr Icelandic Yogurt", cal: 110, protein: 17, carbs: 6, fat: 0, tags: ["no-restrictions","vegetarian"], health: ["low_sodium","low_gi","low_sat_fat"], allergens: ["dairy"], recipe: "Serve 150g Skyr yogurt. Top with berries or a drizzle of honey.", ingredients: [{ item: "Skyr yogurt", qty: "150g" }] },
     { name: "Roasted Chickpeas", cal: 130, protein: 7, carbs: 22, fat: 2, tags: ["no-restrictions","vegan","vegetarian"], health: ["high_fibre","low_gi","low_sat_fat"], allergens: [], recipe: "Toss 80g chickpeas in olive oil, cumin and paprika. Roast 200°C 25 mins until crispy.", ingredients: [{ item: "Chickpeas (canned, drained)", qty: "80g" },{ item: "Olive oil", qty: "1 tsp" },{ item: "Cumin & paprika", qty: "pinch" }] },
-    { name: "Pumpkin Seeds", cal: 180, protein: 9, carbs: 4, fat: 14, tags: ["no-restrictions","vegan","vegetarian","keto"], health: ["low_gi","low_sat_fat","low_sodium"], allergens: [], recipe: "Serve 35g raw or roasted pumpkin seeds. A great source of zinc and magnesium.", ingredients: [{ item: "Pumpkin seeds", qty: "35g" }] },
+    { name: "Pumpkin Seeds", cal: 180, protein: 9, carbs: 4, fibre: 2, fat: 14, tags: ["no-restrictions","vegan","vegetarian","keto"], health: ["low_gi","low_sat_fat","low_sodium"], allergens: [], recipe: "Serve 35g raw or roasted pumpkin seeds. A great source of zinc and magnesium.", ingredients: [{ item: "Pumpkin seeds", qty: "35g" }] },
     { name: "Rice Cakes & Cream Cheese", cal: 110, protein: 3, carbs: 16, fat: 4, tags: ["no-restrictions","vegetarian"], health: ["low_sodium","low_sat_fat"], allergens: ["dairy"], recipe: "Top 2 rice cakes with 30g light cream cheese and sliced cucumber.", ingredients: [{ item: "Rice cakes", qty: "2" },{ item: "Light cream cheese", qty: "30g" },{ item: "Cucumber", qty: "few slices" }] },
     { name: "Protein Pudding", cal: 150, protein: 20, carbs: 12, fat: 2, tags: ["no-restrictions","vegetarian"], health: ["low_gi","low_sat_fat"], allergens: ["dairy"], recipe: "Serve a store-bought protein pudding pot chilled. Ideal for hitting protein targets.", ingredients: [{ item: "Protein pudding pot", qty: "1" }] },
     { name: "Dates & Walnuts", cal: 180, protein: 2, carbs: 36, fat: 5, tags: ["no-restrictions","vegan","vegetarian"], health: ["high_fibre"], allergens: ["nuts"], recipe: "Serve 2 Medjool dates with 2 walnut halves. A natural energy boost.", ingredients: [{ item: "Medjool dates", qty: "2" },{ item: "Walnuts", qty: "2 halves" }] },
@@ -204,6 +204,7 @@ function scaleMeal(meal, multiplier) {
     protein: Math.round(meal.protein * m),
     carbs: Math.round(meal.carbs * m),
     fat: Math.round(meal.fat * m),
+    fibre: meal.fibre != null ? Math.round(meal.fibre * m) : undefined,
     portionScale: m,
     ingredients: meal.ingredients.map(ing => ({
       ...ing,
@@ -247,43 +248,69 @@ function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens
     ? { bf: 0.25, lu: 0.30, di: 0.30, sn: 0.15 }
     : { bf: 0.30, lu: 0.35, di: 0.35, sn: 0 };
 
+  const isKeto = diet === "keto";
+  const KETO_NET_CARB_CAP = 50; // grams net carbs per day; under 20g is fine (stricter keto)
+  const netCarbsOf = (m) => (m ? Math.max(0, m.carbs - (m.fibre || 0)) : 0);
+
   const plan = [];
   const usedMeals = { breakfast: [], lunch: [], dinner: [], snack: [] };
 
+  const bfTarget = Math.round(targetCal * calSplit.bf);
+  const luTarget = Math.round(targetCal * calSplit.lu);
+  const diTarget = Math.round(targetCal * calSplit.di);
+  const snTarget = mealsPerDay === 4 ? Math.round(targetCal * calSplit.sn) : 0;
+
   for (let day = 0; day < 5; day++) {
-    // Pick a meal from filtered options, avoiding repeats where possible,
-    // then scale its portions to hit the calorie target for that slot
-    const pickAndScale = (arr, slotCalTarget, slotKey) => {
-      if (arr.length === 0) return null;
-
-      // Try to pick one we haven't used yet for variety
-      let candidates = arr.filter(m => !usedMeals[slotKey].includes(m.name));
-      if (candidates.length === 0) candidates = arr; // all used, allow repeats
-
-      // Find the meal whose BASE calories are closest (least extreme scaling)
-      candidates.sort((a, b) => Math.abs(a.cal - slotCalTarget) - Math.abs(b.cal - slotCalTarget));
-      const topN = candidates.slice(0, Math.min(3, candidates.length)); const chosen = topN[Math.floor(Math.random() * topN.length)];
-      usedMeals[slotKey].push(chosen.name);
-
-      // Calculate the portion multiplier to hit the slot calorie target
-      const multiplier = slotCalTarget / chosen.cal;
-      return scaleMeal(chosen, multiplier);
+    // Builds one candidate day WITHOUT committing picks to usedMeals,
+    // so keto retries don't burn through the variety pool
+    const buildDay = (preferLowCarb) => {
+      const tentativeUsed = [];
+      const pick = (arr, slotCalTarget, slotKey) => {
+        if (arr.length === 0) return null;
+        // Prefer meals not yet used this week for variety
+        let candidates = arr.filter(m => !usedMeals[slotKey].includes(m.name) && !tentativeUsed.includes(m.name));
+        if (candidates.length === 0) candidates = arr;
+        // Closest base calories = least extreme portion scaling
+        candidates = [...candidates].sort((a, b) => Math.abs(a.cal - slotCalTarget) - Math.abs(b.cal - slotCalTarget));
+        let topN = candidates.slice(0, Math.min(preferLowCarb ? 5 : 3, candidates.length));
+        // On keto retries, bias towards the lowest net-carbs-per-calorie options
+        if (preferLowCarb) topN = [...topN].sort((a, b) => netCarbsOf(a) / a.cal - netCarbsOf(b) / b.cal).slice(0, 3);
+        const chosen = topN[Math.floor(Math.random() * topN.length)];
+        tentativeUsed.push(chosen.name);
+        return scaleMeal(chosen, slotCalTarget / chosen.cal);
+      };
+      const meals = {};
+      meals.breakfast = pick(bfOpts, bfTarget, "breakfast");
+      meals.lunch = pick(luOpts, luTarget, "lunch");
+      meals.dinner = pick(diOpts, diTarget, "dinner");
+      if (mealsPerDay === 4) meals.snack = pick(snOpts, snTarget, "snack");
+      return meals;
     };
 
-    const dayMeals = {};
-    const bfTarget = Math.round(targetCal * calSplit.bf);
-    const luTarget = Math.round(targetCal * calSplit.lu);
-    const diTarget = Math.round(targetCal * calSplit.di);
-    const snTarget = mealsPerDay === 4 ? Math.round(targetCal * calSplit.sn) : 0;
+    let dayMeals = buildDay(isKeto);
+    if (isKeto) {
+      // Enforce the daily net carb cap: retry with low-carb bias, keep the best day
+      const dayNet = (meals) => Object.values(meals).reduce((s, m) => s + netCarbsOf(m), 0);
+      for (let i = 0; i < 8 && dayNet(dayMeals) > KETO_NET_CARB_CAP; i++) {
+        const retry = buildDay(true);
+        if (dayNet(retry) < dayNet(dayMeals)) dayMeals = retry;
+      }
+    }
 
-    dayMeals.breakfast = pickAndScale(bfOpts, bfTarget, "breakfast");
-    dayMeals.lunch = pickAndScale(luOpts, luTarget, "lunch");
-    dayMeals.dinner = pickAndScale(diOpts, diTarget, "dinner");
-    if (mealsPerDay === 4) dayMeals.snack = pickAndScale(snOpts, snTarget, "snack");
+    // Commit this day's picks so later days avoid repeats
+    Object.entries(dayMeals).forEach(([slotKey, m]) => { if (m) usedMeals[slotKey].push(m.name); });
 
-    const totalCal = Object.values(dayMeals).reduce((s, m) => s + (m ? m.cal : 0), 0);
-    const totalProtein = Object.values(dayMeals).reduce((s, m) => s + (m ? m.protein : 0), 0);
-    plan.push({ day: day + 1, meals: dayMeals, totalCal, totalProtein, healthNotes });
+    const sum = (fn) => Object.values(dayMeals).reduce((s, m) => s + (m ? fn(m) : 0), 0);
+    plan.push({
+      day: day + 1,
+      meals: dayMeals,
+      totalCal: sum(m => m.cal),
+      totalProtein: sum(m => m.protein),
+      totalCarbs: sum(m => m.carbs),
+      totalFat: sum(m => m.fat),
+      totalNetCarbs: sum(m => netCarbsOf(m)),
+      healthNotes,
+    });
   }
   return plan;
 }
@@ -534,7 +561,10 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   const bmr = calcBMR(Number(form.age), form.gender, Number(form.weight), Number(form.height), form.unit);
   const tdee = calcTDEE(bmr, form.activity);
   const target = goalCalories(tdee, form.goal);
-  const proteinTarget = calcProteinTarget(Number(form.weight), form.unit, form.goal);
+  // Keto uses classic macro split: 70-80% fat, 15-20% protein, 5-10% carbs
+  const proteinTarget = form.diet === "keto"
+    ? Math.round(target * 0.175 / 4)
+    : calcProteinTarget(Number(form.weight), form.unit, form.goal);
   const saveLead = () => {
     try {
       const f = document.createElement("form");
@@ -564,7 +594,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
     try {
       let mealHtml = "";
       plan.forEach(day => {
-        mealHtml += "<h2>Day " + day.day + " (" + day.totalCal + " kcal | " + day.totalProtein + "g protein)</h2>";
+        mealHtml += "<h2>Day " + day.day + " (" + day.totalCal + " kcal | P: " + day.totalProtein + "g | C: " + day.totalCarbs + "g | F: " + day.totalFat + "g)</h2>";
         Object.entries(day.meals).forEach(([type, meal]) => {
         if (!meal) return;
           if (!meal) return;
@@ -666,7 +696,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       h += `</div>`;
     }
     plan.forEach(day => {
-      h += `<h2>Day ${day.day} <span style="font-weight:400;font-size:13px;color:#888;">(${day.totalCal} kcal | ${day.totalProtein}g protein — Target: ${target} kcal)</span></h2>`;
+      h += `<h2>Day ${day.day} <span style="font-weight:400;font-size:13px;color:#888;">(${day.totalCal} kcal | P: ${day.totalProtein}g | C: ${day.totalCarbs}g | F: ${day.totalFat}g — Target: ${target} kcal)</span></h2>`;
       Object.entries(day.meals).forEach(([type, meal]) => {
         if (!meal) return;
         if (!meal) return;
@@ -1038,40 +1068,50 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
             <div style={{ background: C.grey, borderRadius: 12, padding: 16, marginBottom: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: C.greyMid, marginBottom: 12 }}>Daily Macro Breakdown</div>
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24 }}>
-                <svg width="120" height="120" viewBox="0 0 42 42">
-                  {(() => {
-                    const totalCal = (proteinTarget * 4) + (Math.round((target - (proteinTarget * 4)) * 0.55 / 4) * 4) + (Math.round((target - (proteinTarget * 4)) * 0.45 / 9) * 9);
-                    const pCal = proteinTarget * 4;
-                    const cCal = Math.round((target - pCal) * 0.55);
-                    const fCal = target - pCal - cCal;
-                    const pPct = Math.round(pCal / target * 100);
-                    const cPct = Math.round(cCal / target * 100);
-                    const fPct = 100 - pPct - cPct;
-                    const r = 15.9155;
-                    const circ = 100;
-                    let offset = 25;
-                    const slices = [{pct: pPct, color: "#8BC43F"}, {pct: cPct, color: "#353535"}, {pct: fPct, color: "#f59e0b"}];
-                    return slices.map((s, i) => {
-                      const dash = `${s.pct} ${circ - s.pct}`;
-                      const el = <circle key={i} cx="21" cy="21" r={r} fill="none" stroke={s.color} strokeWidth="6" strokeDasharray={dash} strokeDashoffset={-offset + 100} />;
-                      offset += s.pct;
-                      return el;
-                    });
-                  })()}
-                  <text x="21" y="19" textAnchor="middle" fontSize="5" fontWeight="700" fill="#353535">{target}</text>
-                  <text x="21" y="24" textAnchor="middle" fontSize="3" fill="#888">kcal</text>
-                </svg>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[["Protein", proteinTarget * 4, proteinTarget + "g", "#8BC43F"], ["Carbs", Math.round((target - proteinTarget * 4) * 0.55), Math.round((target - proteinTarget * 4) * 0.55 / 4) + "g", "#353535"], ["Fats", Math.round((target - proteinTarget * 4) * 0.45), Math.round((target - proteinTarget * 4) * 0.45 / 9) + "g", "#f59e0b"]].map(([label, cal, grams, color]) => (
-                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 12, height: 12, borderRadius: 3, background: color, flexShrink: 0 }}></div>
-                      <div style={{ textAlign: "left" }}>
-                        <div style={{ fontSize: 12, fontWeight: 700 }}>{label} <span style={{ color: C.greyMid, fontWeight: 400 }}>{grams}</span></div>
-                        <div style={{ fontSize: 10, color: C.greyMid }}>{Math.round(cal / target * 100)}% of calories</div>
-                      </div>
+                {(() => {
+                  // Averages from the ACTUAL generated meals — always matches the plan below
+                  const days = plan.length || 1;
+                  const avgCal = Math.round(plan.reduce((s, d) => s + d.totalCal, 0) / days);
+                  const avgP = Math.round(plan.reduce((s, d) => s + d.totalProtein, 0) / days);
+                  const avgC = Math.round(plan.reduce((s, d) => s + (d.totalCarbs || 0), 0) / days);
+                  const avgF = Math.round(plan.reduce((s, d) => s + (d.totalFat || 0), 0) / days);
+                  const avgNet = Math.round(plan.reduce((s, d) => s + (d.totalNetCarbs || 0), 0) / days);
+                  const macroCal = avgP * 4 + avgC * 4 + avgF * 9;
+                  const pPct = Math.round(avgP * 4 / macroCal * 100);
+                  const cPct = Math.round(avgC * 4 / macroCal * 100);
+                  const fPct = 100 - pPct - cPct;
+                  const r = 15.9155;
+                  const slices = [{ pct: pPct, color: "#8BC43F" }, { pct: cPct, color: "#353535" }, { pct: fPct, color: "#f59e0b" }];
+                  const legend = [["Protein", avgP, pPct, "#8BC43F"], ["Carbs", avgC, cPct, "#353535"], ["Fats", avgF, fPct, "#f59e0b"]];
+                  let offset = 25;
+                  return (<>
+                    <svg width="120" height="120" viewBox="0 0 42 42">
+                      {slices.map((s, i) => {
+                        const el = <circle key={i} cx="21" cy="21" r={r} fill="none" stroke={s.color} strokeWidth="6" strokeDasharray={`${s.pct} ${100 - s.pct}`} strokeDashoffset={-offset + 100} />;
+                        offset += s.pct;
+                        return el;
+                      })}
+                      <text x="21" y="19" textAnchor="middle" fontSize="5" fontWeight="700" fill="#353535">{avgCal}</text>
+                      <text x="21" y="24" textAnchor="middle" fontSize="3" fill="#888">kcal/day</text>
+                    </svg>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {legend.map(([label, grams, pct, color]) => (
+                        <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{ width: 12, height: 12, borderRadius: 3, background: color, flexShrink: 0 }}></div>
+                          <div style={{ textAlign: "left" }}>
+                            <div style={{ fontSize: 12, fontWeight: 700 }}>{label} <span style={{ color: C.greyMid, fontWeight: 400 }}>{grams}g</span></div>
+                            <div style={{ fontSize: 10, color: C.greyMid }}>{pct}% of calories</div>
+                          </div>
+                        </div>
+                      ))}
+                      {form.diet === "keto" && (
+                        <div style={{ fontSize: 11, fontWeight: 700, color: avgNet <= 50 ? C.green : "#c00", background: avgNet <= 50 ? C.greenLight : "#fee", padding: "5px 9px", borderRadius: 6, marginTop: 2 }}>
+                          {avgNet}g net carbs/day {avgNet <= 50 ? "✓ keto" : "— over 50g"}
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </>);
+                })()}
               </div>
             </div>
 
@@ -1087,7 +1127,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <span style={{ fontWeight: 700, fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Day {day.day}</span>
                   <div style={{ textAlign: "right" }}>
-                    <span style={{ fontSize: 11, color: C.greyMid }}>{day.totalCal} kcal | {day.totalProtein}g protein</span>
+                    <span style={{ fontSize: 11, color: C.greyMid }}>{day.totalCal} kcal | P: {day.totalProtein}g | C: {day.totalCarbs}g | F: {day.totalFat}g{form.diet === "keto" ? ` | ${day.totalNetCarbs}g net` : ""}</span>
                     {Math.abs(day.totalCal - target) <= target * 0.05
                       ? <div style={{ fontSize: 10, color: C.green, fontWeight: 600 }}>✓ On target</div>
                       : <div style={{ fontSize: 10, color: "#d97706", fontWeight: 600 }}>{day.totalCal < target ? "↓" : "↑"} {Math.abs(day.totalCal - target)} kcal {day.totalCal < target ? "under" : "over"}</div>
