@@ -557,6 +557,67 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
     }, 800);
   };
 
+  // Swap a single meal: replaces one slot with a different matching meal,
+  // scaled to the same calorie target, and recomputes that day's totals
+  const swapMeal = (dayNumber, slotKey) => {
+    setPlan(prev => {
+      if (!prev) return prev;
+      const calSplit = form.mealsPerDay === 4
+        ? { breakfast: 0.25, lunch: 0.30, dinner: 0.30, snack: 0.15 }
+        : { breakfast: 0.30, lunch: 0.35, dinner: 0.35, snack: 0 };
+      const slotTarget = Math.round(target * (calSplit[slotKey] || 0.3));
+      const hiddenNames = hiddenMeals.map(h => h.meal_name);
+      const inPlan = prev.flatMap(d => Object.values(d.meals)).filter(Boolean).map(m => m.name);
+      let options = MEALS[slotKey].filter(m =>
+        mealMatchesPrefs(m, form.diet, form.allergens, form.conditions, hiddenNames) && !inPlan.includes(m.name));
+      if (options.length === 0) options = MEALS[slotKey].filter(m =>
+        mealMatchesPrefs(m, form.diet, form.allergens, form.conditions, hiddenNames));
+      if (options.length === 0) return prev;
+      options.sort((a, b) => Math.abs(a.cal - slotTarget) - Math.abs(b.cal - slotTarget));
+      const topN = options.slice(0, Math.min(5, options.length));
+      const chosen = topN[Math.floor(Math.random() * topN.length)];
+      const replacement = scaleMeal(chosen, slotTarget / chosen.cal);
+      return prev.map(d => {
+        if (d.day !== dayNumber) return d;
+        const meals = { ...d.meals, [slotKey]: replacement };
+        const sum = (fn) => Object.values(meals).reduce((s, m) => s + (m ? fn(m) : 0), 0);
+        return { ...d, meals,
+          totalCal: sum(m => m.cal), totalProtein: sum(m => m.protein),
+          totalCarbs: sum(m => m.carbs), totalFat: sum(m => m.fat),
+          totalNetCarbs: sum(m => Math.max(0, m.carbs - (m.fibre || 0))) };
+      });
+    });
+  };
+
+  // ── "What's in my fridge?" matcher ──
+  const [fridgeOpen, setFridgeOpen] = useState(false);
+  const [fridgeInput, setFridgeInput] = useState("");
+  const [fridgeExpanded, setFridgeExpanded] = useState(null);
+
+  const fridgeMatches = useMemo(() => {
+    const terms = fridgeInput.toLowerCase().split(/[,\n]+/).map(t => t.trim()).filter(t => t.length >= 3);
+    if (terms.length === 0) return [];
+    const hiddenNames = hiddenMeals.map(h => h.meal_name);
+    const seen = new Set();
+    const results = [];
+    ["breakfast", "lunch", "dinner", "snack"].forEach(slot => {
+      MEALS[slot].forEach(m => {
+        if (seen.has(m.name)) return;
+        seen.add(m.name);
+        if (!mealMatchesPrefs(m, form.diet, form.allergens, form.conditions, hiddenNames)) return;
+        const have = [], missing = [];
+        m.ingredients.forEach(ing => {
+          const item = ing.item.toLowerCase();
+          if (terms.some(t => item.includes(t) || t.includes(item))) have.push(ing.item);
+          else missing.push(ing.item);
+        });
+        if (have.length > 0) results.push({ meal: m, slot, have, missing });
+      });
+    });
+    results.sort((a, b) => (b.have.length - a.have.length) || (a.missing.length - b.missing.length));
+    return results.slice(0, 20);
+  }, [fridgeInput, form.diet, form.allergens, form.conditions, hiddenMeals]);
+
   const shoppingList = plan ? buildShoppingList(plan, form.people) : [];
   const [checkedItems, setCheckedItems] = useState({});
 
@@ -660,6 +721,55 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   return (
     <div style={S.page}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+      {fridgeOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setFridgeOpen(false)}>
+          <div style={{ background: C.white, borderRadius: 16, padding: 22, maxWidth: 480, width: "100%", maxHeight: "85vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>🧊 What's in my fridge?</div>
+              <span style={{ cursor: "pointer", fontSize: 22, color: C.greyMid }} onClick={() => setFridgeOpen(false)}>×</span>
+            </div>
+            <div style={{ fontSize: 12, color: C.greyMid, marginBottom: 10 }}>List your ingredients (separated by commas) and we'll find meals you can make.</div>
+            <textarea value={fridgeInput} onChange={e => setFridgeInput(e.target.value)} placeholder="e.g. chicken, rice, broccoli, eggs, greek yogurt" rows={3}
+              style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: `1.5px solid ${C.greyBorder}`, borderRadius: 8, fontSize: 14, fontFamily: "inherit", resize: "vertical", marginBottom: 12 }} />
+            {fridgeInput.trim().length >= 3 && fridgeMatches.length === 0 && (
+              <div style={{ fontSize: 13, color: C.greyMid, textAlign: "center", padding: 14 }}>No matches yet — try naming main ingredients like "chicken" or "oats".</div>
+            )}
+            {fridgeMatches.map(({ meal, slot, have, missing }) => {
+              const open = fridgeExpanded === meal.name;
+              return (
+                <div key={meal.name} onClick={() => setFridgeExpanded(open ? null : meal.name)} style={{ background: C.grey, borderRadius: 10, padding: 12, marginBottom: 8, cursor: "pointer", borderLeft: `4px solid ${missing.length === 0 ? C.green : C.greyBorder}` }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 10, textTransform: "uppercase", color: C.greyMid, letterSpacing: 1, fontWeight: 600 }}>{slot}</div>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{meal.name}</div>
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: missing.length === 0 ? C.green : C.dark }}>{have.length}/{meal.ingredients.length}</div>
+                      <div style={{ fontSize: 9, color: C.greyMid }}>ingredients</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: C.greyMid, marginTop: 3 }}>
+                    {meal.cal} kcal | P: {meal.protein}g{meal.prepTime ? ` | ⏱ ${meal.prepTime} min` : ""}
+                    {missing.length > 0 && missing.length <= 4 && <span> | need: {missing.join(", ")}</span>}
+                    {missing.length > 4 && <span> | need {missing.length} more items</span>}
+                  </div>
+                  {open && (
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.greyBorder}` }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Recipe</div>
+                      <div style={{ fontSize: 13, color: "#444", lineHeight: 1.6 }}>{meal.recipe}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, marginTop: 8, marginBottom: 4 }}>Ingredients</div>
+                      <div style={{ fontSize: 12, color: "#555", lineHeight: 1.8 }}>
+                        {meal.ingredients.map((ing, i) => <div key={i}>{have.includes(ing.item) ? "✅" : "◻️"} {ing.qty} {ing.item}</div>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {viewSaved && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 20, overflowY: "auto" }} onClick={() => setViewSaved(false)}>
           <div style={{ background: C.white, borderRadius: 16, padding: 24, maxWidth: 560, width: "100%", maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
@@ -709,7 +819,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
         </div>
       )}
       <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><div style={{ display: "flex", gap: 8 }}>{user && <><button onClick={() => setViewSaved(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>❤️ ({savedMeals.length})</button><button onClick={() => setViewHidden(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>🚫 ({hiddenMeals.length})</button></>}<button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div style={S.logo}>PT<span style={S.logoAccent}>:</span>U</div><div style={{ display: "flex", gap: 8 }}><button onClick={() => setFridgeOpen(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>🧊 Fridge</button>{user && <><button onClick={() => setViewSaved(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>❤️ ({savedMeals.length})</button><button onClick={() => setViewHidden(true)} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>🚫 ({hiddenMeals.length})</button></>}<button onClick={() => guest ? onExitGuest() : supabase.auth.signOut()} style={{ background: "transparent", border: "1px solid #ddd", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#888", cursor: "pointer", fontFamily: "inherit" }}>{guest ? "Sign Up / Log In" : "Log out"}</button></div></div>
         <div style={S.subtitle}>Personalised Meal Planner</div>
 
         {step < 6 && <StepIndicator current={step} total={6} />}
@@ -769,13 +879,6 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
             <div style={S.section}>Your Details</div>
             <div style={S.row}>
               <div style={{ flex: 1 }}>
-                <label style={S.label}>Units</label>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button style={S.btn(form.unit==="metric")} onClick={() => update("unit","metric")}>Metric</button>
-                  <button style={S.btn(form.unit==="imperial")} onClick={() => update("unit","imperial")}>Imperial</button>
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
                 <label style={S.label}>Gender</label>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button style={S.btn(form.gender==="male")} onClick={() => update("gender","male")}>Male</button>
@@ -789,12 +892,12 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 <input style={S.input} type="number" placeholder="25" value={form.age} onChange={e => update("age", e.target.value)} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={S.label}>Weight ({form.unit==="metric" ? "kg" : "lbs"})</label>
-                <input style={S.input} type="number" placeholder={form.unit==="metric"?"75":"165"} value={form.weight} onChange={e => update("weight", e.target.value)} />
+                <label style={S.label}>Weight (kg)</label>
+                <input style={S.input} type="number" placeholder="75" value={form.weight} onChange={e => update("weight", e.target.value)} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={S.label}>Height ({form.unit==="metric" ? "cm" : "in"})</label>
-                <input style={S.input} type="number" placeholder={form.unit==="metric"?"175":"69"} value={form.height} onChange={e => update("height", e.target.value)} />
+                <label style={S.label}>Height (cm)</label>
+                <input style={S.input} type="number" placeholder="175" value={form.height} onChange={e => update("height", e.target.value)} />
               </div>
             </div>
             <div style={{ marginBottom: 16 }}>
@@ -1043,7 +1146,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                           <div style={{ fontSize: 10, textTransform: "uppercase", color: C.greyMid, letterSpacing: 1, fontWeight: 600 }}>{type}</div>
                           <div style={{ fontWeight: 700, fontSize: 14, marginTop: 2 }}>{meal.name}</div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{user && <><span onClick={(e) => { e.stopPropagation(); toggleSaveMeal(meal); }} style={{ fontSize: 20, cursor: "pointer" }}>{isSaved(meal.name) ? "❤️" : "🤍"}</span><span onClick={(e) => { e.stopPropagation(); if(window.confirm("Hide this meal from future plans?")) hideMeal(meal); }} style={{ fontSize: 18, cursor: "pointer", opacity: 0.5 }} title="Don't show me again">👎</span></>}<div style={{ textAlign: "right" }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div><div style={{ fontSize: 10, color: C.greyMid }}>kcal</div></div></div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span onClick={(e) => { e.stopPropagation(); swapMeal(day.day, type); }} style={{ fontSize: 17, cursor: "pointer", opacity: 0.6 }} title="Swap this meal for another">🔄</span>{user && <><span onClick={(e) => { e.stopPropagation(); toggleSaveMeal(meal); }} style={{ fontSize: 20, cursor: "pointer" }}>{isSaved(meal.name) ? "❤️" : "🤍"}</span><span onClick={(e) => { e.stopPropagation(); if(window.confirm("Hide this meal from future plans?")) hideMeal(meal); }} style={{ fontSize: 18, cursor: "pointer", opacity: 0.5 }} title="Don't show me again">👎</span></>}<div style={{ textAlign: "right" }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>{meal.cal}</div><div style={{ fontSize: 10, color: C.greyMid }}>kcal</div></div></div>
                       </div>
                       <div style={{ fontSize: 11, color: C.greyMid, marginTop: 3 }}>
                         P: {meal.protein}g &nbsp; C: {meal.carbs}g &nbsp; F: {meal.fat}g

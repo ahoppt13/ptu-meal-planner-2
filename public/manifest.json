@@ -1,0 +1,26 @@
+{
+  "short_name": "PT:U Meals",
+  "name": "PT:U Meal Planner",
+  "description": "Personalised, evidence-based meal planning by PT:U Personal Training",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#8BC43F",
+  "background_color": "#000000"
+}
