@@ -221,15 +221,7 @@ function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens
   const needsHighFibre = conditions.includes("type2_diabetes") || conditions.includes("high_chol");
 
   const filterMeals = (meals) => {
-    return meals.filter(m => {
-      const dietMatch = diet === "no-restrictions" || m.tags.includes(diet);
-      const allergenFree = !m.allergens.some(a => allergens.includes(a));
-      let healthOk = true;
-      if (needsLowSodium && !m.health.includes("low_sodium")) healthOk = false;
-      if (needsLowGI && !m.health.includes("low_gi")) healthOk = false;
-      if (needsLowSatFat && !m.health.includes("low_sat_fat")) healthOk = false;
-      const notHidden = !hiddenNames.includes(m.name); return dietMatch && allergenFree && healthOk && notHidden;
-    }).sort((a, b) => {
+    return meals.filter(m => mealMatchesPrefs(m, diet, allergens, conditions, hiddenNames)).sort((a, b) => {
       if (needsHighFibre) {
         const aF = a.health.includes("high_fibre") ? 1 : 0;
         const bF = b.health.includes("high_fibre") ? 1 : 0;
@@ -296,18 +288,101 @@ function generateMealPlan(targetCal, proteinTarget, mealsPerDay, diet, allergens
   return plan;
 }
 
+// ─── SHOPPING LIST BUILDER ───────────────────────────────────────
+// Sums quantities properly (200g + 150g = 350g), multiplies by the
+// number of people, and groups items into supermarket categories.
+const SHOP_CATEGORIES = [
+  { name: "Store Cupboard", keywords: ["canned","tinned","stock","puree","paste","sauce","soy","tamari","oil","vinegar","honey","maple","agave","syrup","whey","protein powder","seasoning","cumin","paprika","cayenne","turmeric","cinnamon","curry","chia","seed","nut","almond","peanut","tahini","coconut","raisin","crouton","salsa","mayo","dressing","sweetener","vanilla","bay leaf","taco","tikka","marinara","caper","olive","chickpea","lentil","black bean","flour","breadcrumb","ice","coffee","chilli flake","string cheese"] },
+  { name: "Meat & Fish", keywords: ["chicken","beef","steak","turkey","salmon","cod","tuna","prawn","lamb","ham","sausage","mince","fish"] },
+  { name: "Dairy & Eggs", keywords: ["yogurt","cheese","milk","cream","butter","egg","halloumi","crème","creme"] },
+  { name: "Bakery & Grains", keywords: ["bread","bagel","wrap","oat","rice","quinoa","pasta","spaghetti","granola","sourdough","tortilla"] },
+  { name: "Fruit & Veg", keywords: [] },
+];
+
+function categoriseItem(item) {
+  const lower = item.toLowerCase();
+  for (const cat of SHOP_CATEGORIES) {
+    if (cat.keywords.some(k => lower.includes(k))) return cat.name;
+  }
+  return "Fruit & Veg";
+}
+
+// Parses "200g" / "1/2" / "2 tbsp" / "1 slice (50g)" → { num, unit }; null for "pinch" etc.
+function parseQty(qtyStr) {
+  const match = String(qtyStr).trim().match(/^(\d+\/\d+|\d+\.?\d*)\s*(.*)$/);
+  if (!match) return null;
+  let num;
+  if (match[1].includes("/")) { const [a, b] = match[1].split("/").map(Number); num = a / b; }
+  else num = parseFloat(match[1]);
+  // Normalise unit: strip parentheticals and trailing plural "s"
+  const unit = match[2].replace(/\(.*?\)/g, "").trim().toLowerCase().replace(/s$/, "");
+  return { num, unit };
+}
+
+function formatAmount(n, unit) {
+  if (unit === "g" || unit === "ml") {
+    const whole = Math.round(n);
+    if (whole >= 1000) return `${parseFloat((whole / 1000).toFixed(2))}${unit === "g" ? "kg" : "L"}`;
+    return `${whole}${unit}`;
+  }
+  if (unit === "tbsp" || unit === "tsp") {
+    const q = Math.round(n * 4) / 4; // cooking measures: quarter precision
+    return `${q % 1 === 0 ? q : parseFloat(q.toFixed(2))} ${unit}`;
+  }
+  // Countable items (eggs, bagels, slices, cloves...): round UP — can't buy half an egg
+  const whole = Math.ceil(n);
+  if (!unit) return String(whole);
+  const plural = whole > 1 && !unit.endsWith("s") ? "s" : "";
+  return `${whole} ${unit}${plural}`;
+}
+
 function buildShoppingList(plan, people) {
   const items = {};
   plan.forEach(day => {
     Object.values(day.meals).forEach(meal => {
       if (!meal) return;
       meal.ingredients.forEach(ing => {
-        if (!items[ing.item]) items[ing.item] = [];
-        items[ing.item].push(ing.qty);
+        if (!items[ing.item]) items[ing.item] = { sums: {}, asNeeded: false };
+        const p = parseQty(ing.qty);
+        if (p) items[ing.item].sums[p.unit] = (items[ing.item].sums[p.unit] || 0) + p.num;
+        else items[ing.item].asNeeded = true; // "pinch", "sprig", "handful"
       });
     });
   });
-  return Object.entries(items).map(([item, qtys]) => ({ item, qty: qtys.join(" + "), multiply: people }));
+  const list = Object.entries(items).map(([item, data]) => {
+    const parts = Object.entries(data.sums).map(([unit, total]) => formatAmount(total * people, unit));
+    if (data.asNeeded) parts.push("as needed");
+    return { item, qty: parts.join(" + "), category: categoriseItem(item) };
+  });
+  const grouped = {};
+  list.forEach(e => { (grouped[e.category] = grouped[e.category] || []).push(e); });
+  const order = ["Meat & Fish", "Fruit & Veg", "Dairy & Eggs", "Bakery & Grains", "Store Cupboard"];
+  return order
+    .map(name => ({ category: name, items: (grouped[name] || []).sort((a, b) => a.item.localeCompare(b.item)) }))
+    .filter(g => g.items.length > 0);
+}
+
+// ─── MEAL AVAILABILITY CHECK ─────────────────────────────────────
+// Returns meal slots with ZERO matching meals so we can warn the user
+// before generating, instead of crashing on an empty plan.
+function mealMatchesPrefs(m, diet, allergens, conditions, hiddenNames) {
+  const dietMatch = diet === "no-restrictions" || m.tags.includes(diet);
+  const allergenFree = !m.allergens.some(a => allergens.includes(a));
+  let healthOk = true;
+  if (conditions.includes("high_bp") && !m.health.includes("low_sodium")) healthOk = false;
+  if (conditions.includes("type2_diabetes") && !m.health.includes("low_gi")) healthOk = false;
+  if (conditions.includes("high_chol") && !m.health.includes("low_sat_fat")) healthOk = false;
+  return dietMatch && allergenFree && healthOk && !hiddenNames.includes(m.name);
+}
+
+function checkMealAvailability(diet, allergens, conditions, mealsPerDay, hiddenNames = []) {
+  const count = (meals) => meals.filter(m => mealMatchesPrefs(m, diet, allergens, conditions, hiddenNames)).length;
+  const empty = [];
+  if (count(MEALS.breakfast) === 0) empty.push("breakfast");
+  if (count(MEALS.lunch) === 0) empty.push("lunch");
+  if (count(MEALS.dinner) === 0) empty.push("dinner");
+  if (mealsPerDay === 4 && count(MEALS.snack) === 0) empty.push("snacks");
+  return empty;
 }
 
 // ─── STEP INDICATOR ──────────────────────────────────────────────
@@ -491,6 +566,8 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       plan.forEach(day => {
         mealHtml += "<h2>Day " + day.day + " (" + day.totalCal + " kcal | " + day.totalProtein + "g protein)</h2>";
         Object.entries(day.meals).forEach(([type, meal]) => {
+        if (!meal) return;
+          if (!meal) return;
           if (!meal) return;
           mealHtml += "<div style=\"margin:8px 0;padding:12px;background:#f8f8f8;border-radius:8px;border-left:4px solid #8BC43F;\">";
           mealHtml += "<strong>" + type.charAt(0).toUpperCase() + type.slice(1) + ":</strong> " + meal.name + "<br/>";
@@ -502,7 +579,10 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       });
       let shopHtml = "<h2>Shopping List</h2><table style=\"width:100%;border-collapse:collapse;\">";
       shopHtml += "<tr><th style=\"text-align:left;padding:6px;background:#353535;color:#fff;\">Item</th><th style=\"text-align:left;padding:6px;background:#353535;color:#fff;\">Qty</th></tr>";
-      shoppingList.forEach(s => { shopHtml += "<tr><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.item + "</td><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.qty + " x" + s.multiply + "</td></tr>"; });
+      shoppingList.forEach(group => {
+        shopHtml += "<tr><td colspan=\"2\" style=\"padding:8px 6px;font-weight:700;background:#f4f4f4;\">" + group.category + "</td></tr>";
+        group.items.forEach(s => { shopHtml += "<tr><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.item + "</td><td style=\"padding:6px;border-bottom:1px solid #eee;\">" + s.qty + "</td></tr>"; });
+      });
       shopHtml += "</table>";
       const f = document.createElement("form");
       f.method = "POST";
@@ -526,7 +606,23 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       setTimeout(() => { f.remove(); iframe.remove(); setEmailSent(true); setEmailSending(false); }, 3000);
     } catch(e) { setEmailSending(false); }
   };
+  const [availabilityWarning, setAvailabilityWarning] = useState([]);
+
   const doGenerate = () => { savePreferences();
+    const empty = checkMealAvailability(form.diet, form.allergens, form.conditions, form.mealsPerDay, hiddenMeals.map(h => h.meal_name));
+    if (empty.length > 0) { setAvailabilityWarning(empty); return; }
+    setAvailabilityWarning([]);
+    setGenerating(true);
+    setTimeout(() => {
+      setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions, hiddenMeals.map(h => h.meal_name)));
+      setGenerating(false);
+      setStep(6);
+    }, 800);
+  };
+
+  const doRegenerate = () => {
+    const empty = checkMealAvailability(form.diet, form.allergens, form.conditions, form.mealsPerDay, hiddenMeals.map(h => h.meal_name));
+    if (empty.length > 0) { window.alert(`No ${empty.join(", ")} options match your filters (this can happen after hiding meals). Try unhiding some meals or adjusting your selections.`); return; }
     setGenerating(true);
     setTimeout(() => {
       setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions, hiddenMeals.map(h => h.meal_name)));
@@ -536,6 +632,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
   };
 
   const shoppingList = plan ? buildShoppingList(plan, form.people) : [];
+  const [checkedItems, setCheckedItems] = useState({});
 
   // Print / PDF
   const handlePrint = () => {
@@ -572,6 +669,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
       h += `<h2>Day ${day.day} <span style="font-weight:400;font-size:13px;color:#888;">(${day.totalCal} kcal | ${day.totalProtein}g protein — Target: ${target} kcal)</span></h2>`;
       Object.entries(day.meals).forEach(([type, meal]) => {
         if (!meal) return;
+        if (!meal) return;
         const scaleNote = meal.portionScale && meal.portionScale !== 1
           ? ` <span style="color:#8BC43F;font-size:11px;">(portions adjusted to ${Math.round(meal.portionScale * 100)}%)</span>` : "";
         h += `<div class="meal"><div class="meal-name">${type.charAt(0).toUpperCase()+type.slice(1)}: ${meal.name}${scaleNote}</div>`;
@@ -580,9 +678,12 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
         h += `<div class="ingredients"><strong>Ingredients (adjusted to your calories):</strong> ${meal.ingredients.map(i => `${i.qty} ${i.item}`).join(', ')}</div></div>`;
       });
     });
-    h += `<h2>🛒 Shopping List (×${form.people})</h2>`;
-    h += `<table><tr><th>Item</th><th>Quantity (per person)</th><th>People</th></tr>`;
-    shoppingList.forEach(s => { h += `<tr><td>${s.item}</td><td>${s.qty}</td><td>×${s.multiply}</td></tr>`; });
+    h += `<h2>🛒 Shopping List (${form.people} ${form.people === 1 ? "person" : "people"})</h2>`;
+    h += `<table><tr><th>Item</th><th>Total Quantity</th></tr>`;
+    shoppingList.forEach(group => {
+      h += `<tr><td colspan="2" style="font-weight:700;background:#f4f4f4;">${group.category}</td></tr>`;
+      group.items.forEach(s => { h += `<tr><td>${s.item}</td><td>${s.qty}</td></tr>`; });
+    });
     h += `</table>`;
     h += `<div style="text-align:center;margin-top:40px;padding-top:16px;border-top:2px solid #8BC43F;">`;
     h += `<div style="font-size:20px;font-weight:800;margin-bottom:8px;">PT<span style="color:#8BC43F">:</span>U Personal Training</div>`;
@@ -913,8 +1014,13 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                 </div>
               ))}
             </div>
+            {availabilityWarning.length > 0 && (
+              <div style={{ background: "#fff8e1", border: "1.5px solid #f0c94f", color: "#7a5c00", padding: 14, borderRadius: 10, fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
+                <strong>We couldn't find any {availabilityWarning.join(" or ")} recipes</strong> matching that combination of diet, allergens and health conditions. Go back and adjust one of your selections — we're adding new recipes all the time.
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10 }}>
-              <button style={S.secondary} onClick={() => setStep(4)}>← Back</button>
+              <button style={S.secondary} onClick={() => { setAvailabilityWarning([]); setStep(4); }}>← Back</button>
               <button style={S.primary} onClick={doGenerate}>
                 {generating ? "Generating..." : "Generate Meal Plan →"}
               </button>
@@ -988,7 +1094,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
                     }
                   </div>
                 </div>
-                {Object.entries(day.meals).map(([type, meal]) => {
+                {Object.entries(day.meals).filter(([, meal]) => meal).map(([type, meal]) => {
                   if (!meal) return null;
                   const isOpen = showRecipe === `${day.day}-${type}`;
                   return (
@@ -1032,7 +1138,7 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
 
             <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 20 }}>
               <button style={S.secondary} onClick={() => { setPlan(null); setStep(user ? 1 : 0); setShowRecipe(null); }}>Start Over</button>
-              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={() => { setGenerating(true); setTimeout(() => { setPlan(generateMealPlan(target, proteinTarget, form.mealsPerDay, form.diet, form.allergens, form.conditions, hiddenMeals.map(h => h.meal_name))); setGenerating(false); setStep(6); }, 800); }}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
+              <button style={{ ...S.secondary, borderColor: C.green, color: C.green }} onClick={doRegenerate}>{generating ? "Regenerating..." : "🔄 Regenerate"}</button>
               <button style={S.primary} onClick={handlePrint}>📄 Print / Save PDF</button>
             </div>
             {/* SHOPPING LIST */}
@@ -1041,10 +1147,19 @@ export default function MealPlanner({ user, guest, onExitGuest }) {
               <span style={{ fontSize: 11, fontWeight: 400, color: C.greyMid }}>×{form.people} {form.people===1?"person":"people"}</span>
             </div>
             <div style={{ background: C.grey, borderRadius: 10, padding: 14 }}>
-              {shoppingList.map((s, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: i < shoppingList.length - 1 ? `1px solid ${C.greyBorder}` : "none", fontSize: 13 }}>
-                  <span style={{ fontWeight: 600 }}>{s.item}</span>
-                  <span style={{ color: C.greyMid, fontSize: 12 }}>{s.qty} {form.people > 1 ? `×${s.multiply}` : ""}</span>
+              {shoppingList.map((group) => (
+                <div key={group.category} style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: C.greyMid, padding: "6px 0", borderBottom: `2px solid ${C.greyBorder}` }}>{group.category}</div>
+                  {group.items.map((s) => {
+                    const ticked = !!checkedItems[s.item];
+                    return (
+                      <div key={s.item} onClick={() => setCheckedItems(c => ({ ...c, [s.item]: !c[s.item] }))} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${C.greyBorder}`, fontSize: 13, cursor: "pointer", opacity: ticked ? 0.45 : 1 }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${ticked ? C.green : C.greyBorder}`, background: ticked ? C.green : C.white, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{ticked ? "✓" : ""}</div>
+                        <span style={{ fontWeight: 600, textDecoration: ticked ? "line-through" : "none", flex: 1 }}>{s.item}</span>
+                        <span style={{ color: C.greyMid, fontSize: 12 }}>{s.qty}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
