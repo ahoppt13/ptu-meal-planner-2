@@ -6,6 +6,7 @@ const C = { green: '#8BC43F', greenLight: '#e8f5d3', black: '#000000', dark: '#3
 export default function Auth({ onAuth, onGuest }) {
   const [mode, setMode] = useState('signup'); // 'signup' | 'login' | 'forgot'
   const [resetSent, setResetSent] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,10 +35,21 @@ export default function Auth({ onAuth, onGuest }) {
           options: { data: { name } }
         });
         if (error) throw error;
-        if (data.user) onAuth(data.user);
+        if (data.session) {
+          // Email confirmation disabled: logged straight in
+          onAuth(data.user);
+        } else {
+          // Email confirmation enabled: they must click the link first
+          setConfirmSent(true);
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message && error.message.toLowerCase().includes('confirm')) {
+            throw new Error('Please confirm your email first — check your inbox (and spam) for our link.');
+          }
+          throw error;
+        }
         if (data.user) onAuth(data.user);
       }
     } catch (err) {
@@ -76,7 +88,14 @@ export default function Auth({ onAuth, onGuest }) {
 
         <div style={S.divider}><div style={S.line}></div>OR<div style={S.line}></div></div>
 
-        {mode === 'forgot' && resetSent ? (
+        {confirmSent ? (
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <div style={{ fontSize: 30 }}>📧</div>
+            <div style={{ fontWeight: 700, fontSize: 15, margin: '8px 0 4px' }}>Confirm your email</div>
+            <div style={{ fontSize: 13, color: C.greyMid }}>We've sent a confirmation link to <strong>{email}</strong>. Click it and you'll be logged straight in. Can't see it? Check your spam folder.</div>
+            <div style={{ marginTop: 12, fontSize: 12 }}><span style={S.link} onClick={() => { setConfirmSent(false); setMode('login'); }}>← Back to log in</span></div>
+          </div>
+        ) : mode === 'forgot' && resetSent ? (
           <div style={{ textAlign: 'center', padding: '10px 0' }}>
             <div style={{ fontSize: 30 }}>📧</div>
             <div style={{ fontWeight: 700, fontSize: 15, margin: '8px 0 4px' }}>Check your email</div>
